@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.HashSet;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.cli.CommandLine;
@@ -97,6 +98,7 @@ public class BDQConvert {
 			Link to Specification Source Code,Comments and Questions,Notes ,			
 		**/	
 			
+        // Headers as they are to be produced in the output csv.
 		ArrayList<String> outputHeaders = new ArrayList();
 		outputHeaders.add("#");  
 		outputHeaders.add("IssueState");  
@@ -120,8 +122,9 @@ public class BDQConvert {
 		outputHeaders.add("Link to Specification Source Code"); //Link to Specification Source Code
 		outputHeaders.add("Notes");   // Notes		
 		outputHeaders.add("Specification");   // Specification		
+		outputHeaders.add("Parameters");   // Parameters for tests.  
 			
-		
+		// Headers as they appear as keys in the key/value markdown table in the issues
 		ArrayList<String> headers = new ArrayList();
 		headers.add("GUID");  // GUID
 		headers.add("Label");  // Variable
@@ -141,6 +144,7 @@ public class BDQConvert {
 		headers.add("Link to Specification Source Code"); //Link to Specification Source Code
 		headers.add("Notes");   // Notes
 		headers.add("Description");
+		headers.add("Parameter(s)"); // Parameters (should probably be combined into the specification).
 		//headers.add("Fail Description");   
 		//headers.add("Pass Description");
 		//headers.add("Test Prerequisites");  
@@ -217,6 +221,7 @@ public class BDQConvert {
 	        	
 	        	if (csvLine.get("Label")!=null && csvLine.get("Label").trim().length()>0) { 
 	        		// Line must have a value in Label to be included in output.
+                    if (!csvLine.containsKey("Resource Type")) { csvLine.put("Resource Type","SingleRecord"); }  // see note below about single record.
 	        		Set<String>keys = csvLine.keySet();
 	        		Iterator<String> ik = keys.iterator();
 	        		String frameworkClass = "";
@@ -228,7 +233,7 @@ public class BDQConvert {
 	        		String specificationDescription = null;
 	        		String description = null;
 	        		String termActions = null;
-                    String resourceType = null;
+                    String resourceType = "SingleRecord";  /// assume this default value, see note below.
                     String dqDimension = null;
 
 	        		while (ik.hasNext()) { 
@@ -242,12 +247,21 @@ public class BDQConvert {
 	        				outputLine.put("Type", value);
 	        				frameworkClass = value;
 	        			}
-	        			if (key.equals("Resource Type")) { outputLine.put("Resource Type", value);  resourceType = value; }
+	        			if (key.equals("Resource Type")) { 
+                             if (value==null || value.trim().equals("")) { 
+                                // Lee stripped all of the Resource Types out of the tests, as all appeared to be SingleRecord instead of MultiRecord
+                                // therefore assumme if value is absent that this is a SingleRecord test.
+                                value = "SingleRecord";
+                             }
+                             outputLine.put("Resource Type", value); 
+                             resourceType = value; 
+                        }
 	        			if (key.equals("Data Quality Dimension")) { outputLine.put("Dimension", value); dqDimension=value; }
 	        			if (key.equals("Warning Type")) { outputLine.put("Warning Type", value); }
 	        			if (key.equals("Term-Actions")) { termActions = value; }
 	        			if (key.equals("Source")) { outputLine.put("Source", value); }
 	        			if (key.equals("References")) { outputLine.put("References", value); }
+	        			if (key.equals("Parameter(s)")) { outputLine.put("Parameters", value); }
 	        			if (key.equals("Example")) { outputLine.put("Example", value); }
 	        			if (key.equals("Example Implementations (Mechanisms)")) { outputLine.put("Example Implementations (Mechanisms)", value); }
 	        			if (key.equals("Link to Specification Source Code")) { outputLine.put("Link to Specification Source Code", value); }
