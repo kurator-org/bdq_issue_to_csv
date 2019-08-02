@@ -21,14 +21,20 @@ If more than one json file, combine, e.g.
 
 Then convert to csv with issueconverter jar
 
-usage: java -jar issueconverter-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+usage: java -jar issueconverter-0.0.2-SNAPSHOT-jar-with-dependencies.jar
  -f <arg>   JSON file to convert
 
-    java -jar issueconverter-0.0.1-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json 
+    java -jar issueconverter-0.0.2-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json 
 
-Resulting output.csv should be in suitable form for input into kurator-ffdq utility test-util.sh, for example: 
+or, to capture the java annotations for each test that are shown on the console to a file:
+
+    java -jar issueconverter-0.0.2-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json  > annotations.java
+
+The resulting output.csv should be in suitable form for input into kurator-ffdq utility test-util.sh to generate RDF, for example: 
 
     sh test-util.sh -config testsuite/testsuite.properties -format JSON-LD \
        -out testsuite/tg2_issues_2018Sept7.json \
        -in testsuite/tg2_issues_2018Sept7.csv
+
+However, values that do not fit the expections of the controlled vocabularies used in kurator-ffdq may cause rows to be skipped or may cause fatal exceptions in generating the RDF.
 
