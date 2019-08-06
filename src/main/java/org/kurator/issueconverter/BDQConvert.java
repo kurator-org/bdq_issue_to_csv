@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -196,27 +197,34 @@ public class BDQConvert {
 	        	
 	        	ArrayList<String> lines = new ArrayList<String>(Arrays.asList(body.split("\n")));
 	        	Iterator<String> i = lines.iterator();
-	        	StringBuffer fieldAccumulator = new StringBuffer();
+                String lastHeader = new String();
+                ArrayList<String> valueAccumulator = new ArrayList<String>();
+	        	String lvalue = "";
 	        	while (i.hasNext()) { 
 	        		String line = i.next().trim();
 	        		line = line.replaceFirst("\\|", "").trim();
 	        		ArrayList cells = new ArrayList<String>(Arrays.asList(line.split("\\|")));
 	        		Iterator<String> i2 = cells.iterator();
 	        		String header = i2.next().replaceAll("\\*", "").trim();
-	        		String value = "";
-	        		if (i2.hasNext()) { 
-	        		    value = i2.next().trim();
-	        		}
 	        		if (!header.equals("-----") && !header.equals("Field")) { 
 	        			if (header.trim().length()==0) { 
-	        				fieldAccumulator.append(value).append(" ");
+                            header = lastHeader; 
+                            if (i2.hasNext()) { 
+                                String v = i2.next().trim();
+                                valueAccumulator.add(v);
+                                lvalue = String.join(",",valueAccumulator);
+                            }
+                        } else {  
+                            valueAccumulator.clear();
+	        		        lvalue = "";
+	        		        if (i2.hasNext()) { 
+	        		            lvalue = i2.next().trim();
+	        		        }
+                            valueAccumulator.add(lvalue);
 	        			}
-	        			csvLine.put(header, value);
-	        		}
-	        		
-	        	}
-	        	if (fieldAccumulator.length()>0) { 
-	        		csvLine.put("Information Elements", csvLine.get("Information Elements") + fieldAccumulator.toString());
+	        			csvLine.put(header, lvalue);
+                    }
+	        		lastHeader = header;
 	        	}
 	        	
 	        	if (csvLine.get("Label")!=null && csvLine.get("Label").trim().length()>0) { 
@@ -276,10 +284,8 @@ public class BDQConvert {
 	        			//	outputLine.put("IE Class", value); 
 	        			//}
 	        			if (key.equals("Information Elements")) {
-	        				terms.append(value).append(" ");
-	        			}
-	        			if (key.equals("")) {
-	        				terms.append(value).append(" ");
+	        		        outputLine.put("Information Element", value);
+	        				//terms.append(value).append(" ");
 	        			}
 	        			if (key.equals("Darwin Core Class")) { 
                             dwcClass = value;
@@ -289,14 +295,11 @@ public class BDQConvert {
 	        			//if (key.equals("Fail Description")) {  problemDescription = value; }
 	        			if (key.equals("Description")) {  description = value; }
 	        			//if (key.equals("Pass Description")) {  validationDescription = value; }
-
 	        		}
 
                     // comma separated list of terms
-	        		String informationElement = terms.toString().trim().replaceAll(" ",",").replaceAll(",,",",");
+	        		// String informationElement = terms.toString().trim().replaceAll(" ",",").replaceAll(",,",",");
 
-
-	        		outputLine.put("Information Element", informationElement);
 	        		String outputDes = description;
                     if (outputDes==null) { 
                        // issue doesn't have a human readable description, create one
