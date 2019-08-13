@@ -101,29 +101,29 @@ public class BDQConvert {
 			
         // Headers as they are to be produced in the output csv.
 		ArrayList<String> outputHeaders = new ArrayList();
-		outputHeaders.add("#");  
-		outputHeaders.add("IssueState");  
-		outputHeaders.add("Confirmed");  
-		outputHeaders.add("IssueLabels");  
-		outputHeaders.add("GUID");  // GUID
-		outputHeaders.add("Label");  // Variable
-		outputHeaders.add("IE Category");   
-		outputHeaders.add("IE Class");   
-		outputHeaders.add("Information Element");    
-		outputHeaders.add("Description");
-		outputHeaders.add("Type");  // Output Type   Class: Validation/Amendment/Measure
-		outputHeaders.add("Resource Type");   // Resource Type
-		outputHeaders.add("Dimension");	 //DQ Dimension
+		outputHeaders.add("#");   // the issue number
+		//  outputHeaders.add("Confirmed");  // Is there a confirmed label, now removed from all records.
+		outputHeaders.add("GUID");  // GUID, machine readable identifier for test
+		outputHeaders.add("Label");  // Variable, human readable identifier for test
+		outputHeaders.add("IE Category");  // broad concepts the information elements fall into 
+		outputHeaders.add("IE Class");   // Darwin Core class(es) the information elements fall into
+		outputHeaders.add("Information Element");   // Framework concept, the list of Darwin Core terms forming specific information elements
+		outputHeaders.add("Parameters");   // Parameters for tests.  
+		outputHeaders.add("Specification");   // Specification	Framework concept	
+		outputHeaders.add("Description"); // Human readable summary ov structured concepts in the test
+		outputHeaders.add("Type");  // Output Type  Framework Class: Validation/Amendment/Measure/Issue
+		outputHeaders.add("Resource Type");   // Resource Type Single- or Multi- Record  Framework concept
+		outputHeaders.add("Dimension");	 //DQ Dimension  Framework concept
 		outputHeaders.add("Warning Type");  // Warning Type
 		outputHeaders.add("Example");  // An example 
-		outputHeaders.add("Source");  // Source
-		outputHeaders.add("Test Prerequisites");  
-		outputHeaders.add("References");  // References
+		outputHeaders.add("Source");  // Source from which the test was originaly drawn
+		// outputHeaders.add("Test Prerequisites");  // No longer present, merged into specification
+		outputHeaders.add("References");  // References 
 		outputHeaders.add("Example Implementations (Mechanisms)");  // Mechanisms 
 		outputHeaders.add("Link to Specification Source Code"); //Link to Specification Source Code
 		outputHeaders.add("Notes");   // Notes		
-		outputHeaders.add("Specification");   // Specification		
-		outputHeaders.add("Parameters");   // Parameters for tests.  
+		outputHeaders.add("IssueState");  // open or closed
+		outputHeaders.add("IssueLabels");  // Labels present on the github issue.
 			
 		// Headers as they appear as keys in the key/value markdown table in the issues
 		ArrayList<String> headers = new ArrayList();
@@ -183,169 +183,173 @@ public class BDQConvert {
 	                issueLabels.append(separator).append(label);
 	                separator = " ";
 	            }
+	            if (issueLabels.toString().contains("DO NOT IMPLEMENT")) { 
+                    // skip this test, do not add to output spreadsheet.
+                } else { 
+                    // generate output
 	        	
-	        	HashMap<String,String> csvLine = new HashMap<String,String>(); 
-	        	HashMap<String,String> outputLine = new HashMap<String,String>();
-	        	outputLine.put("#", Integer.toString(number));
-	        	outputLine.put("IssueState", state);
-	        	outputLine.put("IssueLabels", issueLabels.toString());
-	            if (issueLabels.toString().contains("CONFIRMED")) { 
-	            	outputLine.put("Confirmed","CONFIRMED");
-	            } else { 
-	            	outputLine.put("Confirmed","");
-	            }
-	        	
-	        	ArrayList<String> lines = new ArrayList<String>(Arrays.asList(body.split("\n")));
-	        	Iterator<String> i = lines.iterator();
-                String lastHeader = new String();
-                ArrayList<String> valueAccumulator = new ArrayList<String>();
-	        	String lvalue = "";
-	        	while (i.hasNext()) { 
-	        		String line = i.next().trim();
-	        		line = line.replaceFirst("\\|", "").trim();
-	        		ArrayList cells = new ArrayList<String>(Arrays.asList(line.split("\\|")));
-	        		Iterator<String> i2 = cells.iterator();
-	        		String header = i2.next().replaceAll("\\*", "").trim();
-	        		if (!header.equals("-----") && !header.equals("Field")) { 
-	        			if (header.trim().length()==0) { 
-                            header = lastHeader; 
-                            if (i2.hasNext()) { 
-                                String v = i2.next().trim();
-                                valueAccumulator.add(v);
-                                lvalue = String.join(",",valueAccumulator);
-                            }
-                        } else {  
-                            valueAccumulator.clear();
-	        		        lvalue = "";
-	        		        if (i2.hasNext()) { 
-	        		            lvalue = i2.next().trim();
-	        		        }
-                            valueAccumulator.add(lvalue);
-	        			}
-	        			csvLine.put(header, lvalue);
-                    }
-	        		lastHeader = header;
-	        	}
-	        	
-	        	if (csvLine.get("Label")!=null && csvLine.get("Label").trim().length()>0) { 
-	        		// Line must have a value in Label to be included in output.
-                    if (!csvLine.containsKey("Resource Type")) { csvLine.put("Resource Type","SingleRecord"); }  // see note below about single record.
-	        		Set<String>keys = csvLine.keySet();
-	        		Iterator<String> ik = keys.iterator();
-	        		String frameworkClass = "";
-	        		String dimension = "";
-	        		StringBuffer terms = new StringBuffer();
-	        		String dwcClass = "";
-	        		//String problemDescription = null;
-	        		//String validationDescription = null;
-	        		String specificationDescription = null;
-	        		String description = null;
-	        		String termActions = null;
-                    String resourceType = "SingleRecord";  /// assume this default value, see note below.
-                    String dqDimension = null;
-
-	        		while (ik.hasNext()) { 
-	        			String key = ik.next();
-	        			allkeys.put(key,key);
-	        			String value = csvLine.get(key);
-
-	        			if (key.equals("GUID")) { outputLine.put("GUID", value); }
-	        			if (key.equals("Label")) { outputLine.put("Label", value); }
-	        			if (key.equals("Output Type")) { 
-	        				outputLine.put("Type", value);
-	        				frameworkClass = value;
-	        			}
-	        			if (key.equals("Resource Type")) { 
-                             if (value==null || value.trim().equals("")) { 
-                                // Lee stripped all of the Resource Types out of the tests, as all appeared to be SingleRecord instead of MultiRecord
-                                // therefore assumme if value is absent that this is a SingleRecord test.
-                                value = "SingleRecord";
-                             }
-                             outputLine.put("Resource Type", value); 
-                             resourceType = value; 
-                        }
-	        			if (key.equals("Data Quality Dimension")) { outputLine.put("Dimension", value); dqDimension=value; }
-	        			if (key.equals("Warning Type")) { outputLine.put("Warning Type", value); }
-	        			if (key.equals("Term-Actions")) { termActions = value; }
-	        			if (key.equals("Source")) { outputLine.put("Source", value); }
-	        			if (key.equals("References")) { outputLine.put("References", value); }
-	        			if (key.equals("Parameter(s)")) { outputLine.put("Parameters", value); }
-	        			if (key.equals("Example")) { outputLine.put("Example", value); }
-	        			if (key.equals("Example Implementations (Mechanisms)")) { outputLine.put("Example Implementations (Mechanisms)", value); }
-	        			if (key.equals("Link to Specification Source Code")) { outputLine.put("Link to Specification Source Code", value); }
-	        			if (key.equals("Notes")) { outputLine.put("Notes", value); }
-	        			if (key.equals("Test Prerequisites")) { outputLine.put("Test Prerequisites", value); }
-	        			if (key.equals("Dimension")) {
-	        				dimension = value;
-	        				outputLine.put("IE Category", value); 
-	        			}
-	        			//if (key.equals("Dimension")) {
-	        			//	dimension = value;
-	        			//	outputLine.put("IE Class", value); 
-	        			//}
-	        			if (key.equals("Information Elements")) {
-	        		        outputLine.put("Information Element", value);
-	        				//terms.append(value).append(" ");
-	        			}
-	        			if (key.equals("Darwin Core Class")) { 
-                            dwcClass = value;
-	        				outputLine.put("IE Class", value); 
-                        }	        		
-	        			if (key.equals("Expected Response")) {  specificationDescription = value; }
-	        			//if (key.equals("Fail Description")) {  problemDescription = value; }
-	        			if (key.equals("Description")) {  description = value; }
-	        			//if (key.equals("Pass Description")) {  validationDescription = value; }
-	        		}
-
-                    // comma separated list of terms
-	        		// String informationElement = terms.toString().trim().replaceAll(" ",",").replaceAll(",,",",");
-
-	        		String outputDes = description;
-                    if (outputDes==null) { 
-                       // issue doesn't have a human readable description, create one
-                       StringBuffer des = new StringBuffer();
-                       des.append("#").append(Integer.toString(number)).append(" ").append(frameworkClass).append(" "); 
-                       des.append(resourceType).append(" ");
-                       des.append(dqDimension).append(": ");
-                       //des.append(StringUtils.capitalize(termActions.replace("_", " ").toLowerCase()));
-                       des.append(termActions.replace("_", " ").toLowerCase());
-
-                       outputDes = des.toString();
-                    } 
-//	        		StringBuffer specification = new StringBuffer();
-//	        		if (frameworkClass.equalsIgnoreCase("validation")) { outputDes = validationDescription; }
-//	        		if (frameworkClass.equalsIgnoreCase("amendment")) { outputDes = description; }
-//	        		if (frameworkClass.equalsIgnoreCase("measure")) { outputDes = description; }
-//	        		if (frameworkClass.equalsIgnoreCase("problem")) { outputDes = problemDescription; }
-//	        		if (frameworkClass.equalsIgnoreCase("validation")) { 
-//	        			specification.append("COMPLIANT if ").append(validationDescription)
-//	        			.append(" NOT_COMPLIANT if ").append(problemDescription)
-//	        			.append(" Prereqisites: ").append(outputLine.get("Test Prerequisites"));
-//	        		} else if (frameworkClass.equalsIgnoreCase("problem")) {
-//	        			specification.append("NOT_PROBLEM if ").append(validationDescription)
-//	        			.append(" PROBLEM if ").append(problemDescription)
-//	        			.append(" Prereqisites: ").append(outputLine.get("Test Prerequisites"));	        		
-//	        		} else { 
-//	        			specification.append(outputDes).append(" Prereqisites: ").append(outputLine.get("Test Prerequisites"));
-//	        		}
-	        		outputLine.put("Description", outputDes);
-	        		outputLine.put("Specification", specificationDescription);
-
-	        		Iterator<String> iok = outputHeaders.iterator();
-	        		while (iok.hasNext()) {
-	        			String key = iok.next();
-	        			outputPrinter.print(outputLine.get(key));
-	        		}
-	        		outputPrinter.println();
-
-	        		System.out.println("@Provides(value=\"urn:uuid:" + outputLine.get("GUID")+ "\")");
-	        		System.out.println("@"+frameworkClass+"( label = \"" + outputLine.get("Label") + "\", description=\"" + outputDes + "\")");
-	        	    System.out.println("@Specification(value=\"" + specificationDescription +"\")");
-	        		System.out.println("");
-
-	        	}
-
-	        }
+		        	HashMap<String,String> csvLine = new HashMap<String,String>(); 
+		        	HashMap<String,String> outputLine = new HashMap<String,String>();
+		        	outputLine.put("#", Integer.toString(number));
+		        	outputLine.put("IssueState", state);
+		        	outputLine.put("IssueLabels", issueLabels.toString());
+		            if (issueLabels.toString().contains("CONFIRMED")) { 
+		            	outputLine.put("Confirmed","CONFIRMED");
+		            } else { 
+		            	outputLine.put("Confirmed","");
+		            }
+		        	
+		        	ArrayList<String> lines = new ArrayList<String>(Arrays.asList(body.split("\n")));
+		        	Iterator<String> i = lines.iterator();
+	                String lastHeader = new String();
+	                ArrayList<String> valueAccumulator = new ArrayList<String>();
+		        	String lvalue = "";
+		        	while (i.hasNext()) { 
+		        		String line = i.next().trim();
+		        		line = line.replaceFirst("\\|", "").trim();
+		        		ArrayList cells = new ArrayList<String>(Arrays.asList(line.split("\\|")));
+		        		Iterator<String> i2 = cells.iterator();
+		        		String header = i2.next().replaceAll("\\*", "").trim();
+		        		if (!header.equals("-----") && !header.equals("Field")) { 
+		        			if (header.trim().length()==0) { 
+	                            header = lastHeader; 
+	                            if (i2.hasNext()) { 
+	                                String v = i2.next().trim();
+	                                valueAccumulator.add(v);
+	                                lvalue = String.join(",",valueAccumulator);
+	                            }
+	                        } else {  
+	                            valueAccumulator.clear();
+		        		        lvalue = "";
+		        		        if (i2.hasNext()) { 
+		        		            lvalue = i2.next().trim();
+		        		        }
+	                            valueAccumulator.add(lvalue);
+		        			}
+		        			csvLine.put(header, lvalue);
+	                    }
+		        		lastHeader = header;
+		        	}
+		        	
+		        	if (csvLine.get("Label")!=null && csvLine.get("Label").trim().length()>0) { 
+		        		// Line must have a value in Label to be included in output.
+	                    if (!csvLine.containsKey("Resource Type")) { csvLine.put("Resource Type","SingleRecord"); }  // see note below about single record.
+		        		Set<String>keys = csvLine.keySet();
+		        		Iterator<String> ik = keys.iterator();
+		        		String frameworkClass = "";
+		        		String dimension = "";
+		        		StringBuffer terms = new StringBuffer();
+		        		String dwcClass = "";
+		        		//String problemDescription = null;
+		        		//String validationDescription = null;
+		        		String specificationDescription = null;
+		        		String description = null;
+		        		String termActions = null;
+	                    String resourceType = "SingleRecord";  /// assume this default value, see note below.
+	                    String dqDimension = null;
+	
+		        		while (ik.hasNext()) { 
+		        			String key = ik.next();
+		        			allkeys.put(key,key);
+		        			String value = csvLine.get(key);
+	
+		        			if (key.equals("GUID")) { outputLine.put("GUID", value); }
+		        			if (key.equals("Label")) { outputLine.put("Label", value); }
+		        			if (key.equals("Output Type")) { 
+		        				outputLine.put("Type", value);
+		        				frameworkClass = value;
+		        			}
+		        			if (key.equals("Resource Type")) { 
+	                             if (value==null || value.trim().equals("")) { 
+	                                // Lee stripped all of the Resource Types out of the tests, as all appeared to be SingleRecord instead of MultiRecord
+	                                // therefore assumme if value is absent that this is a SingleRecord test.
+	                                value = "SingleRecord";
+	                             }
+	                             outputLine.put("Resource Type", value); 
+	                             resourceType = value; 
+	                        }
+		        			if (key.equals("Data Quality Dimension")) { outputLine.put("Dimension", value); dqDimension=value; }
+		        			if (key.equals("Warning Type")) { outputLine.put("Warning Type", value); }
+		        			if (key.equals("Term-Actions")) { termActions = value; }
+		        			if (key.equals("Source")) { outputLine.put("Source", value); }
+		        			if (key.equals("References")) { outputLine.put("References", value); }
+		        			if (key.equals("Parameter(s)")) { outputLine.put("Parameters", value); }
+		        			if (key.equals("Example")) { outputLine.put("Example", value); }
+		        			if (key.equals("Example Implementations (Mechanisms)")) { outputLine.put("Example Implementations (Mechanisms)", value); }
+		        			if (key.equals("Link to Specification Source Code")) { outputLine.put("Link to Specification Source Code", value); }
+		        			if (key.equals("Notes")) { outputLine.put("Notes", value); }
+		        			if (key.equals("Test Prerequisites")) { outputLine.put("Test Prerequisites", value); }
+		        			if (key.equals("Dimension")) {
+		        				dimension = value;
+		        				outputLine.put("IE Category", value); 
+		        			}
+		        			//if (key.equals("Dimension")) {
+		        			//	dimension = value;
+		        			//	outputLine.put("IE Class", value); 
+		        			//}
+		        			if (key.equals("Information Elements")) {
+		        		        outputLine.put("Information Element", value);
+		        				//terms.append(value).append(" ");
+		        			}
+		        			if (key.equals("Darwin Core Class")) { 
+	                            dwcClass = value;
+		        				outputLine.put("IE Class", value); 
+	                        }	        		
+		        			if (key.equals("Expected Response")) {  specificationDescription = value; }
+		        			//if (key.equals("Fail Description")) {  problemDescription = value; }
+		        			if (key.equals("Description")) {  description = value; }
+		        			//if (key.equals("Pass Description")) {  validationDescription = value; }
+		        		}
+	
+	                    // comma separated list of terms
+		        		// String informationElement = terms.toString().trim().replaceAll(" ",",").replaceAll(",,",",");
+	
+		        		String outputDes = description;
+	                    if (outputDes==null) { 
+	                       // issue doesn't have a human readable description, create one
+	                       StringBuffer des = new StringBuffer();
+	                       des.append("#").append(Integer.toString(number)).append(" ").append(frameworkClass).append(" "); 
+	                       des.append(resourceType).append(" ");
+	                       des.append(dqDimension).append(": ");
+	                       //des.append(StringUtils.capitalize(termActions.replace("_", " ").toLowerCase()));
+	                       des.append(termActions.replace("_", " ").toLowerCase());
+	
+	                       outputDes = des.toString();
+	                    } 
+	//	        		StringBuffer specification = new StringBuffer();
+	//	        		if (frameworkClass.equalsIgnoreCase("validation")) { outputDes = validationDescription; }
+	//	        		if (frameworkClass.equalsIgnoreCase("amendment")) { outputDes = description; }
+	//	        		if (frameworkClass.equalsIgnoreCase("measure")) { outputDes = description; }
+	//	        		if (frameworkClass.equalsIgnoreCase("problem")) { outputDes = problemDescription; }
+	//	        		if (frameworkClass.equalsIgnoreCase("validation")) { 
+	//	        			specification.append("COMPLIANT if ").append(validationDescription)
+	//	        			.append(" NOT_COMPLIANT if ").append(problemDescription)
+	//	        			.append(" Prereqisites: ").append(outputLine.get("Test Prerequisites"));
+	//	        		} else if (frameworkClass.equalsIgnoreCase("problem")) {
+	//	        			specification.append("NOT_PROBLEM if ").append(validationDescription)
+	//	        			.append(" PROBLEM if ").append(problemDescription)
+	//	        			.append(" Prereqisites: ").append(outputLine.get("Test Prerequisites"));	        		
+	//	        		} else { 
+	//	        			specification.append(outputDes).append(" Prereqisites: ").append(outputLine.get("Test Prerequisites"));
+	//	        		}
+		        		outputLine.put("Description", outputDes);
+		        		outputLine.put("Specification", specificationDescription);
+	
+		        		Iterator<String> iok = outputHeaders.iterator();
+		        		while (iok.hasNext()) {
+		        			String key = iok.next();
+		        			outputPrinter.print(outputLine.get(key));
+		        		}
+		        		outputPrinter.println();
+	
+		        		System.out.println("@Provides(value=\"urn:uuid:" + outputLine.get("GUID")+ "\")");
+		        		System.out.println("@"+frameworkClass+"( label = \"" + outputLine.get("Label") + "\", description=\"" + outputDes + "\")");
+		        	    System.out.println("@Specification(value=\"" + specificationDescription +"\")");
+		        		System.out.println("");
+	
+		        	}
+                } // end produce output (has labels specifying test is to be used.
+	        } // end loop through issues 
 	        outputPrinter.close();
 	        
 	        /**	
