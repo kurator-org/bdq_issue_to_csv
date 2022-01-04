@@ -361,6 +361,8 @@ public class BDQConvert {
 	        }
 	        System.out.println("");
 	        */
+
+			os.close();
 			
 		} catch (FileNotFoundException e) {
 			logger.error(e.getMessage());
