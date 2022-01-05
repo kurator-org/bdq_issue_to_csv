@@ -50,7 +50,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * @author mole
+ * BDQConvert special purpose class to extract data quality framework information from by convention tabular organization within
+ * TDWG BDQ (Biodiversity Data Quality TG) github issues to csv suitable for examination in spreadsheets or conversion to RDF.
+ *
+ * @author Paul J. Morris
  *
  */
 public class BDQConvert {
@@ -62,6 +65,7 @@ public class BDQConvert {
 	private static final Log logger = LogFactory.getLog(BDQConvert.class);
 
 	/**
+	 * main method, expected entry point, launched from command line.
 	 * @param args
 	 */
 	public static void main(String[] args) {
@@ -166,15 +170,13 @@ public class BDQConvert {
 			
 			HashMap<String,String> allkeys = new HashMap<String,String>();
 			
-			
-			
 	        for (int x=0; x<jsonArray.length(); x++) { 
 	        	JSONObject element = jsonArray.getJSONObject(x);
 	        	String body = (String) element.get("body");
 	            Integer number = (Integer) element.get("number");
 	            String state = (String) element.get("state");
 	            
-	            StringBuffer issueLabels = new StringBuffer();
+	            StringBuilder issueLabels = new StringBuilder();
 	            JSONArray labels = element.getJSONArray("labels");
 	            String separator = "";
 	            for (int y=0; y<labels.length(); y++) {
@@ -238,7 +240,7 @@ public class BDQConvert {
 		        		Iterator<String> ik = keys.iterator();
 		        		String frameworkClass = "";
 		        		String dimension = "";
-		        		StringBuffer terms = new StringBuffer();
+		        		StringBuilder terms = new StringBuilder();
 		        		String dwcClass = "";
 		        		//String problemDescription = null;
 		        		//String validationDescription = null;
@@ -307,7 +309,7 @@ public class BDQConvert {
 		        		String outputDes = description;
 	                    if (outputDes==null) { 
 	                       // issue doesn't have a human readable description, create one
-	                       StringBuffer des = new StringBuffer();
+	                       StringBuilder des = new StringBuilder();
 	                       des.append("#").append(Integer.toString(number)).append(" ").append(frameworkClass).append(" "); 
 	                       des.append(resourceType).append(" ");
 	                       des.append(dqDimension).append(": ");
@@ -316,7 +318,7 @@ public class BDQConvert {
 	
 	                       outputDes = des.toString();
 	                    } 
-	//	        		StringBuffer specification = new StringBuffer();
+	//	        		StringBuilder specification = new StringBuilder();
 	//	        		if (frameworkClass.equalsIgnoreCase("validation")) { outputDes = validationDescription; }
 	//	        		if (frameworkClass.equalsIgnoreCase("amendment")) { outputDes = description; }
 	//	        		if (frameworkClass.equalsIgnoreCase("measure")) { outputDes = description; }
