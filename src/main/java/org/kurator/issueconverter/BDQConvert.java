@@ -115,6 +115,7 @@ public class BDQConvert {
 		outputHeaders.add("Parameters");   // Parameters for tests.  
 		outputHeaders.add("Specification");   // Specification	Framework concept	
 		outputHeaders.add("Description"); // Human readable summary ov structured concepts in the test
+		outputHeaders.add("Criterion Label"); // Human readable summary ov structured concepts in the test
 		outputHeaders.add("Type");  // Output Type  Framework Class: Validation/Amendment/Measure/Issue
 		outputHeaders.add("Resource Type");   // Resource Type Single- or Multi- Record  Framework concept
 		outputHeaders.add("Dimension");	 //DQ Dimension  Framework concept
@@ -141,6 +142,7 @@ public class BDQConvert {
 		headers.add("Dimension");  // Information Element Category   
 		headers.add("Data Quality Dimension");	 //DQ Dimension
 		headers.add("Term-Actions");  
+		headers.add("Description");  
 		headers.add("Warning Type");  // Warning Type
 		headers.add("Example");  
 		headers.add("Source");  // Source
@@ -246,6 +248,7 @@ public class BDQConvert {
 		        		//String validationDescription = null;
 		        		String specificationDescription = null;
 		        		String description = null;
+						String criterionLabel = null;
 		        		String termActions = null;
 	                    String resourceType = "SingleRecord";  /// assume this default value, see note below.
 	                    String dqDimension = null;
@@ -307,7 +310,7 @@ public class BDQConvert {
 		        		// String informationElement = terms.toString().trim().replaceAll(" ",",").replaceAll(",,",",");
 	
 		        		String outputDes = description;
-	                    if (outputDes==null) { 
+	                	if (outputDes==null) { 
 	                       // issue doesn't have a human readable description, create one
 	                       StringBuilder des = new StringBuilder();
 	                       des.append("#").append(Integer.toString(number)).append(" ").append(frameworkClass).append(" "); 
@@ -317,7 +320,13 @@ public class BDQConvert {
 	                       des.append(termActions.replace("_", " ").toLowerCase());
 	
 	                       outputDes = des.toString();
-	                    } 
+	                  } 
+	                  if (criterionLabel==null) { 
+	                       StringBuilder des = new StringBuilder();
+	                       des.append(dqDimension).append(": ");
+	                       des.append(termActions.substring(termActions.lastIndexOf("_") + 1).toLowerCase());
+								  criterionLabel = des.toString();
+							}
 	//	        		StringBuilder specification = new StringBuilder();
 	//	        		if (frameworkClass.equalsIgnoreCase("validation")) { outputDes = validationDescription; }
 	//	        		if (frameworkClass.equalsIgnoreCase("amendment")) { outputDes = description; }
@@ -336,6 +345,7 @@ public class BDQConvert {
 	//	        		}
 		        		outputLine.put("Description", outputDes);
 		        		outputLine.put("Specification", specificationDescription);
+		        		outputLine.put("Criterion Label", criterionLabel);
 	
 		        		Iterator<String> iok = outputHeaders.iterator();
 		        		while (iok.hasNext()) {
@@ -346,7 +356,7 @@ public class BDQConvert {
 	
 		        		System.out.println("@Provides(value=\"urn:uuid:" + outputLine.get("GUID")+ "\")");
 		        		System.out.println("@"+frameworkClass+"( label = \"" + outputLine.get("Label") + "\", description=\"" + outputDes + "\")");
-		        	    System.out.println("@Specification(value=\"" + specificationDescription +"\")");
+		        	   System.out.println("@Specification(value=\"" + specificationDescription +"\")");
 		        		System.out.println("");
 	
 		        	}
