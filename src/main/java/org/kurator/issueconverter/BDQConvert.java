@@ -356,7 +356,7 @@ public class BDQConvert {
 	
 		        		System.out.println("@Provides(value=\"urn:uuid:" + outputLine.get("GUID")+ "\")");
 		        		System.out.println("@"+frameworkClass+"( label = \"" + outputLine.get("Label") + "\", description=\"" + outputDes + "\")");
-		        	   System.out.println("@Specification(value=\"" + specificationDescription +"\")");
+		        	    System.out.println("@Specification(value=\"" + specificationDescription +"\")");
 		        		System.out.println("");
 	
 		        	}
