@@ -53,7 +53,7 @@ the test-util.sh utility in kurator-ffdq):
     java -jar issueconverter-0.0.2-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json 
 	cd ~/git
 	git clone git@github.com:tdwg/bdq.git
-	cp bdq_issue_to_csv/issuelist.json bdq/tg2/core/TG2Tests.csv
+	cp bdq_issue_to_csv/issuelist.json bdq/tg2/core/TG2_tests.csv
 	git clone git@github.com:kurator-org/kurator-ffdq
 	cd kurator-ffdq
 	mvn package
@@ -61,6 +61,5 @@ the test-util.sh utility in kurator-ffdq):
 	./test-util.sh -config data/tg2_tests.properties -format RDFXML \
       -out ../bdq/tg2/core/TG2_tests.xml \
       -in  data/TG2_tests.csv
-
 
 Note, values that do not fit the expections of the controlled vocabularies used in kurator-ffdq may cause rows to be skipped or may cause fatal exceptions in generating the RDF (AllDarwinCoreTerms as a composite information element isn't supported yet, so grep is used to exclude lines in the csv containing that value".
