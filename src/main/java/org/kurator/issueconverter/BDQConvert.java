@@ -109,7 +109,7 @@ public class BDQConvert {
 		//  outputHeaders.add("Confirmed");  // Is there a confirmed label, now removed from all records.
 		outputHeaders.add("GUID");  // GUID, machine readable identifier for test
 		outputHeaders.add("Label");  // Variable, human readable identifier for test
-		outputHeaders.add("IE Category");  // broad concepts the information elements fall into 
+		outputHeaders.add("IE Category");  // broad concepts the information elements fall into ** Deprecated **
 		outputHeaders.add("IE Class");   // Darwin Core class(es) the information elements fall into
 		outputHeaders.add("Information Element");   // Framework concept, the list of Darwin Core terms forming specific information elements
 		outputHeaders.add("Parameters");   // Parameters for tests.  
@@ -139,7 +139,7 @@ public class BDQConvert {
 		headers.add("Darwin Core Class");  // Darwin Core Class
 		headers.add("Information Elements");    
 		headers.add("Expected Response");  // specification, replaces pass/fail descriptiosn and prerequisites.
-		headers.add("Dimension");  // Information Element Category   
+		// headers.add("Dimension");  // Information Element Category   ** To be removed ** 
 		headers.add("Data Quality Dimension");	 //DQ Dimension
 		headers.add("Term-Actions");  
 		headers.add("Description");  
@@ -151,7 +151,8 @@ public class BDQConvert {
 		headers.add("Link to Specification Source Code"); //Link to Specification Source Code
 		headers.add("Notes");   // Notes
 		headers.add("Description");
-		headers.add("Parameter(s)"); // Parameters (should probably be combined into the specification).
+		headers.add("Parameter(s)"); // Parameters for the test in the form bdq:sourceAuthority default="defaultvalue"
+		headers.add("Source Authority"); // to append to the expected response.
 		//headers.add("Fail Description");   
 		//headers.add("Pass Description");
 		//headers.add("Test Prerequisites");  
@@ -241,7 +242,7 @@ public class BDQConvert {
 		        		Set<String>keys = csvLine.keySet();
 		        		Iterator<String> ik = keys.iterator();
 		        		String frameworkClass = "";
-		        		String dimension = "";
+		        		// String dimension = "";
 		        		StringBuilder terms = new StringBuilder();
 		        		String dwcClass = "";
 		        		//String problemDescription = null;
@@ -252,6 +253,8 @@ public class BDQConvert {
 		        		String termActions = null;
 	                    String resourceType = "SingleRecord";  /// assume this default value, see note below.
 	                    String dqDimension = null;
+	                    String sourceAuthority = null;
+	                    List<String> parameters = new ArrayList<String>();
 	
 		        		while (ik.hasNext()) { 
 		        			String key = ik.next();
@@ -278,16 +281,16 @@ public class BDQConvert {
 		        			if (key.equals("Term-Actions")) { termActions = value; }
 		        			if (key.equals("Source")) { outputLine.put("Source", value); }
 		        			if (key.equals("References")) { outputLine.put("References", value); }
-		        			if (key.equals("Parameter(s)")) { outputLine.put("Parameters", value); }
+		        			if (key.equals("Parameter(s)")) { parameters.add(value); }
 		        			if (key.equals("Example")) { outputLine.put("Example", value); }
 		        			if (key.equals("Example Implementations (Mechanisms)")) { outputLine.put("Example Implementations (Mechanisms)", value); }
 		        			if (key.equals("Link to Specification Source Code")) { outputLine.put("Link to Specification Source Code", value); }
 		        			if (key.equals("Notes")) { outputLine.put("Notes", value); }
 		        			if (key.equals("Test Prerequisites")) { outputLine.put("Test Prerequisites", value); }
-		        			if (key.equals("Dimension")) {
-		        				dimension = value;
-		        				outputLine.put("IE Category", value); 
-		        			}
+		        			//if (key.equals("Dimension")) {
+		        			//	dimension = value;
+		        			//	outputLine.put("IE Category", value); 
+		        			//}
 		        			//if (key.equals("Dimension")) {
 		        			//	dimension = value;
 		        			//	outputLine.put("IE Class", value); 
@@ -301,6 +304,7 @@ public class BDQConvert {
 		        				outputLine.put("IE Class", value); 
 	                        }	        		
 		        			if (key.equals("Expected Response")) {  specificationDescription = value; }
+		        			if (key.equals("Source Authority")) {  sourceAuthority = value; }
 		        			//if (key.equals("Fail Description")) {  problemDescription = value; }
 		        			if (key.equals("Description")) {  description = value; }
 		        			//if (key.equals("Pass Description")) {  validationDescription = value; }
@@ -344,8 +348,18 @@ public class BDQConvert {
 	//	        			specification.append(outputDes).append(" Prereqisites: ").append(outputLine.get("Test Prerequisites"));
 	//	        		}
 		        		outputLine.put("Description", outputDes);
-		        		outputLine.put("Specification", specificationDescription);
+		        		if (sourceAuthority !=null) { 
+		        			specificationDescription = specificationDescription.concat(" ").concat(sourceAuthority);
+		        		}
+		        		outputLine.put("Specification", specificationDescription );
 		        		outputLine.put("Criterion Label", criterionLabel);
+		        		StringBuilder parameterString = new StringBuilder();
+		        		Iterator<String> iparam =parameters.iterator();
+		        		String paramSeparator = "";
+		        		while (iparam.hasNext()) { 
+		        			parameterString.append(paramSeparator).append(iparam.next());
+		        		}
+		        		outputLine.put("Parameters", parameterString.toString());
 	
 		        		Iterator<String> iok = outputHeaders.iterator();
 		        		while (iok.hasNext()) {
