@@ -19,14 +19,14 @@ If more than one json file, combine, e.g (using the jq command line JSON process
 
     jq -s 'flatten | group_by(.id) | map(reduce .[] as $x ({}; . * $x))' issuelist1.json issuelist2.json > issuelist.json
 
-Then convert to csv with issueconverter jar
+Then convert to csv with issueconverter jar (produces a converted csv file in output.csv)
 
 usage: java -jar issueconverter-0.0.2-SNAPSHOT-jar-with-dependencies.jar
  -f <arg>   JSON file to convert
 
     java -jar issueconverter-0.0.2-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json 
 
-This (issuelist.json) is the file which is checked in to tdwg/bdq as https://github.com/tdwg/bdq/blob/master/tg2/core/TG2_tests.csv
+The resulting output.csv (produced from issuelist.json) is the file which is checked in to tdwg/bdq as https://github.com/tdwg/bdq/blob/master/tg2/core/TG2_tests.csv
 
 Java class anotations are shown on the console as issueconverter is running, if desired, you can capture these
 java annotations for each test to a file:
