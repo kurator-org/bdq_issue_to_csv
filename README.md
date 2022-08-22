@@ -53,7 +53,7 @@ the test-util.sh utility in kurator-ffdq):
     java -jar issueconverter-0.0.2-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json 
     cd ~/git
     git clone git@github.com:tdwg/bdq.git
-    cp bdq_issue_to_csv/issuelist.json bdq/tg2/core/TG2_tests.csv
+    cp bdq_issue_to_csv/output.csv bdq/tg2/core/TG2_tests.csv
     git clone git@github.com:kurator-org/kurator-ffdq
     cd kurator-ffdq
     mvn package
