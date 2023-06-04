@@ -5,4 +5,4 @@ wget "https://api.github.com/repos/tdwg/bdq/issues?labels=TG2;CORE&per_page=100&
 
 jq -s 'flatten | group_by(.id) | map(reduce .[] as $x ({}; . * $x))' issuelist1.json issuelist2.json > issuelist.json
 
-java -jar target/issueconverter-0.0.1-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json
+java -jar target/issueconverter-0.0.3-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json
