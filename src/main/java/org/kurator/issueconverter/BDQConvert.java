@@ -108,6 +108,7 @@ public class BDQConvert {
 		outputHeaders.add("#");   // the issue number
 		//  outputHeaders.add("Confirmed");  // Is there a confirmed label, now removed from all records.
 		outputHeaders.add("GUID");  // GUID, machine readable identifier for test
+		outputHeaders.add("DateLastUpdated");  // Most recent modification date for test
 		outputHeaders.add("Label");  // Variable, human readable identifier for test
 		outputHeaders.add("IE Category");  // broad concepts the information elements fall into ** Deprecated **
 		outputHeaders.add("IE Class");   // Darwin Core class(es) the information elements fall into
@@ -178,6 +179,7 @@ public class BDQConvert {
 	        	String body = (String) element.get("body");
 	            Integer number = (Integer) element.get("number");
 	            String state = (String) element.get("state");
+	            String updated_at = (String) element.get("updated_at");
 	            
 	            StringBuilder issueLabels = new StringBuilder();
 	            JSONArray labels = element.getJSONArray("labels");
@@ -261,7 +263,10 @@ public class BDQConvert {
 		        			allkeys.put(key,key);
 		        			String value = csvLine.get(key);
 	
-		        			if (key.equals("GUID")) { outputLine.put("GUID", value); }
+		        			if (key.equals("GUID")) { 
+								outputLine.put("GUID", value); 
+								outputLine.put("DateLastUpdated",updated_at);
+							}
 		        			if (key.equals("Label")) { outputLine.put("Label", value); }
 		        			if (key.equals("Output Type")) { 
 		        				outputLine.put("Type", value);
