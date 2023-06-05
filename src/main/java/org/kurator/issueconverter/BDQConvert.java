@@ -180,6 +180,10 @@ public class BDQConvert {
 	            Integer number = (Integer) element.get("number");
 	            String state = (String) element.get("state");
 	            String updated_at = (String) element.get("updated_at");
+	            if (updated_at.length()>10) { 
+	            	// per TDWG standards description specification, use yyyy-mm-dd as the version, leave off time.
+	            	updated_at = updated_at.substring(0, 10);
+	            }
 	            
 	            StringBuilder issueLabels = new StringBuilder();
 	            JSONArray labels = element.getJSONArray("labels");
@@ -374,6 +378,7 @@ public class BDQConvert {
 		        		outputPrinter.println();
 	
 		        		System.out.println("@Provides(value=\"urn:uuid:" + outputLine.get("GUID")+ "\")");
+		        		System.out.println("@ProvidesVersion(value=\"urn:uuid:" + outputLine.get("GUID")+ "/" +  outputLine.get("DateLastUpdated") + "\")");
 		        		System.out.println("@"+frameworkClass+"( label = \"" + outputLine.get("Label") + "\", description=\"" + outputDes + "\")");
 		        	    System.out.println("@Specification(value=\"" + specificationDescription +"\")");
 		        		System.out.println("");
