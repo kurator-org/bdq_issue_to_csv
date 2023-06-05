@@ -378,7 +378,7 @@ public class BDQConvert {
 		        		outputPrinter.println();
 	
 		        		System.out.println("@Provides(value=\"urn:uuid:" + outputLine.get("GUID")+ "\")");
-		        		System.out.println("@ProvidesVersion(value=\"urn:uuid:" + outputLine.get("GUID")+ "/" +  outputLine.get("DateLastUpdated") + "\")");
+		        		System.out.println("@ProvidesVersion(value=\"https://rs.tdwg.org/bdq/terms/" + outputLine.get("GUID")+ "/" +  outputLine.get("DateLastUpdated") + "\")");
 		        		System.out.println("@"+frameworkClass+"( label = \"" + outputLine.get("Label") + "\", description=\"" + outputDes + "\")");
 		        	    System.out.println("@Specification(value=\"" + specificationDescription +"\")");
 		        		System.out.println("");
