@@ -99,7 +99,7 @@ public class BDQConvert {
 	    /**
 			#,GUID,IDs,Variable,Description (test - FAIL),Description (test - PASS),Specification (Technical Description)
 			,Record Resolution,Term Resolution,Data Dependency,Output Type,Example,Darwin Core Class,Darwin Core Terms,
-			DQ Dimension,Severity,Warning Type,Source,References,Example Implementations (Mechanisms),
+			DQ Dimension,Severity,Warning Type,Source,References,Specification Last Updated, Example Implementations (Mechanisms),
 			Link to Specification Source Code,Comments and Questions,Notes ,			
 		**/	
 			
@@ -148,6 +148,7 @@ public class BDQConvert {
 		headers.add("Example");  
 		headers.add("Source");  // Source
 		headers.add("References");  // References
+		headers.add("Specification Last Updated");  // overrides updated_at
 		headers.add("Example Implementations (Mechanisms)");  
 		headers.add("Link to Specification Source Code"); //Link to Specification Source Code
 		headers.add("Notes");   // Notes
@@ -246,6 +247,19 @@ public class BDQConvert {
 		        		// Line must have a value in Label to be included in output.
 	                    if (!csvLine.containsKey("Resource Type")) { csvLine.put("Resource Type","SingleRecord"); }  // see note below about single record.
 		        		Set<String>keys = csvLine.keySet();
+		        		Iterator<String> ikDateCheck = keys.iterator();
+		        		while (ikDateCheck.hasNext()) { 
+		        			// Specification Last Updated in markdown table overwrites updated_at value
+		        			// for issue to allow non-normative updates to be distinguished from updates
+		        			// that will require examination of implementations for compliance.
+		        			String key = ikDateCheck.next();
+		        			if (key.equals("Specification Last Updated")) { 
+		        				String value = csvLine.get(key);
+		        				if (value!=null && value.length()==10) { 
+		        					updated_at = value;
+		        				} 
+		        			}
+		        		}
 		        		Iterator<String> ik = keys.iterator();
 		        		String frameworkClass = "";
 		        		// String dimension = "";
