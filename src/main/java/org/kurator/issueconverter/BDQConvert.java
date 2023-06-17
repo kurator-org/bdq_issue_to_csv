@@ -104,7 +104,7 @@ public class BDQConvert {
 		**/	
 			
         // Headers as they are to be produced in the output csv.
-		ArrayList<String> outputHeaders = new ArrayList();
+		ArrayList<String> outputHeaders = new ArrayList<String>();
 		outputHeaders.add("#");   // the issue number
 		//  outputHeaders.add("Confirmed");  // Is there a confirmed label, now removed from all records.
 		outputHeaders.add("GUID");  // GUID, machine readable identifier for test
@@ -132,7 +132,7 @@ public class BDQConvert {
 		outputHeaders.add("IssueLabels");  // Labels present on the github issue.
 			
 		// Headers as they appear as keys in the key/value markdown table in the issues
-		ArrayList<String> headers = new ArrayList();
+		ArrayList<String> headers = new ArrayList<String>();
 		headers.add("GUID");  // GUID
 		headers.add("Label");  // Variable
 		headers.add("Output Type");  // Output Type   Class: Validation/Amendment/Measure
@@ -219,7 +219,7 @@ public class BDQConvert {
 		        	while (i.hasNext()) { 
 		        		String line = i.next().trim();
 		        		line = line.replaceFirst("\\|", "").trim();
-		        		ArrayList cells = new ArrayList<String>(Arrays.asList(line.split("\\|")));
+		        		ArrayList<String> cells = new ArrayList<String>(Arrays.asList(line.split("\\|")));
 		        		Iterator<String> i2 = cells.iterator();
 		        		String header = i2.next().replaceAll("\\*", "").trim();
 		        		if (!header.equals("-----") && !header.equals("Field")) { 
