@@ -10,10 +10,10 @@ Build with
 
 ## Use ##
 
-Obtain issues as json from github API:
+Obtain issues (with label=CORE https://github.com/tdwg/bdq/issues?q=is%3Aissue+label%3ACORE on web UI) as json from github API:
 
-    wget "https://api.github.com/repos/tdwg/bdq/issues?labels=TG2;CORE&per_page=100"  -O issuelist1.json
-    wget "https://api.github.com/repos/tdwg/bdq/issues?labels=TG2;CORE&per_page=100&page=2" -O issuelist2.json
+    wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100"  -O issuelist1.json
+    wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100&page=2" -O issuelist2.json
 
 If more than one json file, combine, e.g (using the jq command line JSON processor). 
 

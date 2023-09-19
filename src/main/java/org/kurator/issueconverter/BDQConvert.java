@@ -110,9 +110,11 @@ public class BDQConvert {
 		outputHeaders.add("GUID");  // GUID, machine readable identifier for test
 		outputHeaders.add("DateLastUpdated");  // Most recent modification date for test
 		outputHeaders.add("Label");  // Variable, human readable identifier for test
-		outputHeaders.add("IE Category");  // broad concepts the information elements fall into ** Deprecated **
+		// outputHeaders.add("IE Category");  // broad concepts the information elements fall into ** Deprecated **
 		outputHeaders.add("IE Class");   // Darwin Core class(es) the information elements fall into
 		outputHeaders.add("Information Element");   // Framework concept, the list of Darwin Core terms forming specific information elements
+		outputHeaders.add("InformationElement:ActedUpon");   // Framework concept, the list of Darwin Core terms forming specific information elements
+		outputHeaders.add("InformationElement:Consulted");   // Framework concept, the list of Darwin Core terms forming specific information elements
 		outputHeaders.add("Parameters");   // Parameters for tests.  
 		outputHeaders.add("Specification");   // Specification	Framework concept	
 		outputHeaders.add("Description"); // Human readable summary ov structured concepts in the test
@@ -135,10 +137,13 @@ public class BDQConvert {
 		ArrayList<String> headers = new ArrayList<String>();
 		headers.add("GUID");  // GUID
 		headers.add("Label");  // Variable
-		headers.add("Output Type");  // Output Type   Class: Validation/Amendment/Measure
+		// headers.add("Output Type");  // Output Type   Class: Validation/Amendment/Measure  ** Changing to TestType **
+		headers.add("TestType");  // Output Type   Class: Validation/Amendment/Measure
 		headers.add("Resource Type");   // Resource Type
 		headers.add("Darwin Core Class");  // Darwin Core Class
 		headers.add("Information Elements");    
+		headers.add("Information Elements ActedUpon");    
+		headers.add("Information Elements Consulted");    
 		headers.add("Expected Response");  // specification, replaces pass/fail descriptiosn and prerequisites.
 		// headers.add("Dimension");  // Information Element Category   ** To be removed ** 
 		headers.add("Data Quality Dimension");	 //DQ Dimension
@@ -222,7 +227,7 @@ public class BDQConvert {
 		        		ArrayList<String> cells = new ArrayList<String>(Arrays.asList(line.split("\\|")));
 		        		Iterator<String> i2 = cells.iterator();
 		        		String header = i2.next().replaceAll("\\*", "").trim();
-		        		if (!header.equals("-----") && !header.equals("Field")) { 
+		        		if (!header.equals("-----") && !header.equals("TestField")) { 
 		        			if (header.trim().length()==0) { 
 	                            header = lastHeader; 
 	                            if (i2.hasNext()) { 
@@ -286,7 +291,11 @@ public class BDQConvert {
 								outputLine.put("DateLastUpdated",updated_at);
 							}
 		        			if (key.equals("Label")) { outputLine.put("Label", value); }
-		        			if (key.equals("Output Type")) { 
+		        			//if (key.equals("Output Type")) { 
+		        			//	outputLine.put("Type", value);
+		        			//	frameworkClass = value;
+		        			//}
+		        			if (key.equals("TestType")) { 
 		        				outputLine.put("Type", value);
 		        				frameworkClass = value;
 		        			}
@@ -318,9 +327,21 @@ public class BDQConvert {
 		        			//	dimension = value;
 		        			//	outputLine.put("IE Class", value); 
 		        			//}
-		        			if (key.equals("Information Elements")) {
-		        		        outputLine.put("Information Element", value);
-		        				//terms.append(value).append(" ");
+		        			//if (key.equals("Information Elements")) {
+		        		    //    outputLine.put("Information Element", value);
+		        			//	terms.append(value).append(" ");
+		        			//}
+		        			if (key.equals("Information Elements ActedUpon")) {
+								if (!value.trim().equals("")) {
+		        		        	outputLine.put("InformationElement:ActedUpon", value);
+		        					terms.append(value).append("@ActedUpon ");
+								}
+		        			}
+		        			if (key.equals("Information Elements Consulted")) {
+								if (!value.trim().equals("")) {
+		        		        	outputLine.put("InformationElement:Consulted", value);
+			        				terms.append(value).append("@Consulted ");
+								}
 		        			}
 		        			if (key.equals("Darwin Core Class")) { 
 	                            dwcClass = value;
@@ -334,7 +355,8 @@ public class BDQConvert {
 		        		}
 	
 	                    // comma separated list of terms
-		        		// String informationElement = terms.toString().trim().replaceAll(" ",",").replaceAll(",,",",");
+		        		String informationElement = terms.toString().trim().replaceAll(" ",",").replaceAll(",,",",");
+		        		//outputLine.put("Information Element", informationElement);
 	
 		        		String outputDes = description;
 	                	if (outputDes==null) { 
