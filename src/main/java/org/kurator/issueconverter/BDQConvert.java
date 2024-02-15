@@ -182,7 +182,7 @@ public class BDQConvert {
 			
 	        for (int x=0; x<jsonArray.length(); x++) { 
 	        	JSONObject element = jsonArray.getJSONObject(x);
-	        	String body = (String) element.get("body");
+	        	String body = (String) element.get("body");	        	
 	            Integer number = (Integer) element.get("number");
 	            String state = (String) element.get("state");
 	            String updated_at = (String) element.get("updated_at");
@@ -190,6 +190,7 @@ public class BDQConvert {
 	            	// per TDWG standards description specification, use yyyy-mm-dd as the version, leave off time.
 	            	updated_at = updated_at.substring(0, 10);
 	            }
+		        System.out.println("// #" + Integer.toString(number));	            
 	            
 	            StringBuilder issueLabels = new StringBuilder();
 	            JSONArray labels = element.getJSONArray("labels");
@@ -247,7 +248,6 @@ public class BDQConvert {
 	                    }
 		        		lastHeader = header;
 		        	}
-		        	
 		        	if (csvLine.get("Label")!=null && csvLine.get("Label").trim().length()>0) { 
 		        		// Line must have a value in Label to be included in output.
 	                    if (!csvLine.containsKey("Resource Type")) { csvLine.put("Resource Type","SingleRecord"); }  // see note below about single record.
@@ -419,6 +419,8 @@ public class BDQConvert {
 		        	    System.out.println("@Specification(value=\"" + specificationDescription +"\")");
 		        		System.out.println("");
 	
+		        	} else { 
+		        		System.out.println("// #" + Integer.toString(number) + ", not written, lacks a label ");	            
 		        	}
                 } // end produce output (has labels specifying test is to be used.
 	        } // end loop through issues 
