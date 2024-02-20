@@ -112,19 +112,19 @@ public class BDQConvert {
 		outputHeaders.add("Label");  // Variable, human readable identifier for test
 		// outputHeaders.add("IE Category");  // broad concepts the information elements fall into ** Deprecated **
 		outputHeaders.add("IE Class");   // Darwin Core class(es) the information elements fall into
-		outputHeaders.add("Information Element");   // Framework concept, the list of Darwin Core terms forming specific information elements
+		// outputHeaders.add("Information Element");   // Framework concept, the list of Darwin Core terms forming specific information elements
 		outputHeaders.add("InformationElement:ActedUpon");   // Framework concept, the list of Darwin Core terms forming specific information elements
 		outputHeaders.add("InformationElement:Consulted");   // Framework concept, the list of Darwin Core terms forming specific information elements
 		outputHeaders.add("Parameters");   // Parameters for tests.  
 		outputHeaders.add("Specification");   // Specification	Framework concept	
-		outputHeaders.add("Description"); // Human readable summary ov structured concepts in the test
-		outputHeaders.add("Criterion Label"); // Human readable summary ov structured concepts in the test
+		outputHeaders.add("Description"); // Human readable summary of structured concepts in the test
+		outputHeaders.add("Criterion Label"); // Human readable summary of structured concepts in the test
 		outputHeaders.add("Type");  // Output Type  Framework Class: Validation/Amendment/Measure/Issue
 		outputHeaders.add("Resource Type");   // Resource Type Single- or Multi- Record  Framework concept
 		outputHeaders.add("Dimension");	 //DQ Dimension  Framework concept
-		outputHeaders.add("Warning Type");  // Warning Type
-		outputHeaders.add("Example");  // An example 
-		outputHeaders.add("Source");  // Source from which the test was originaly drawn
+		// outputHeaders.add("Warning Type");  // Warning Type
+		outputHeaders.add("Examples");  // Two examples 
+		outputHeaders.add("Source");  // Source from which the test was originally drawn
 		// outputHeaders.add("Test Prerequisites");  // No longer present, merged into specification
 		outputHeaders.add("References");  // References 
 		outputHeaders.add("Example Implementations (Mechanisms)");  // Mechanisms 
@@ -141,7 +141,7 @@ public class BDQConvert {
 		headers.add("TestType");  // Output Type   Class: Validation/Amendment/Measure
 		headers.add("Resource Type");   // Resource Type
 		headers.add("Darwin Core Class");  // Darwin Core Class
-		headers.add("Information Elements");    
+		// headers.add("Information Elements");  // replaced with ActedUpon/Consulted
 		headers.add("Information Elements ActedUpon");    
 		headers.add("Information Elements Consulted");    
 		headers.add("Expected Response");  // specification, replaces pass/fail descriptiosn and prerequisites.
@@ -150,7 +150,7 @@ public class BDQConvert {
 		headers.add("Term-Actions");  
 		headers.add("Description");  
 		headers.add("Warning Type");  // Warning Type
-		headers.add("Example");  
+		headers.add("Examples");  
 		headers.add("Source");  // Source
 		headers.add("References");  // References
 		headers.add("Specification Last Updated");  // overrides updated_at
@@ -269,6 +269,7 @@ public class BDQConvert {
 		        		String frameworkClass = "";
 		        		// String dimension = "";
 		        		StringBuilder terms = new StringBuilder();
+		        		StringBuilder examples = new StringBuilder();
 		        		String dwcClass = "";
 		        		//String problemDescription = null;
 		        		//String validationDescription = null;
@@ -314,7 +315,12 @@ public class BDQConvert {
 		        			if (key.equals("Source")) { outputLine.put("Source", value); }
 		        			if (key.equals("References")) { outputLine.put("References", value); }
 		        			if (key.equals("Parameter(s)")) { parameters.add(value); }
-		        			if (key.equals("Example")) { outputLine.put("Example", value); }
+		        			if (key.equals("Examples")) { 
+								if (!value.trim().equals("")) {
+		        					examples.append(value);
+		        		        	outputLine.put("Examples", examples.toString());
+								}
+		        			}
 		        			if (key.equals("Example Implementations (Mechanisms)")) { outputLine.put("Example Implementations (Mechanisms)", value); }
 		        			if (key.equals("Link to Specification Source Code")) { outputLine.put("Link to Specification Source Code", value); }
 		        			if (key.equals("Notes")) { outputLine.put("Notes", value); }
