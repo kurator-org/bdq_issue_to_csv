@@ -50,7 +50,7 @@ the test-util.sh utility in kurator-ffdq):
     wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100"  -O issuelist1.json
     wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100&page=2" -O issuelist2.json
     jq -s 'flatten | group_by(.id) | map(reduce .[] as $x ({}; . * $x))' issuelist1.json issuelist2.json > issuelist.json
-    java -jar issueconverter-0.0.5-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json 
+    java -jar ./target/issueconverter-0.0.5-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json 
     cd ~/git
     git clone git@github.com:tdwg/bdq.git
     cp bdq_issue_to_csv/output.csv bdq/tg2/core/TG2_tests.csv
@@ -61,5 +61,12 @@ the test-util.sh utility in kurator-ffdq):
     ./test-util.sh -config data/tg2_tests.properties -format RDFXML \
         -out ../bdq/tg2/core/TG2_tests.xml \
         -in  data/TG2_tests.csv
+
+And for supplementary tests: 
+
+    cd ../bdq_issue_to_csv
+	wget "https://api.github.com/repos/tdwg/bdq/issues?labels=Supplementary&per_page=100&state=all" -O supplementalissuelist.json
+	java -jar target/issueconverter-0.0.5-SNAPSHOT-jar-with-dependencies.jar -f supplementalissuelist.json
+	cp ./output.csv ../tg2/supplementary/TG2_supplementary_tests.csv
 
 Note, values that do not fit the expections of the controlled vocabularies used in kurator-ffdq may cause rows to be skipped or may cause fatal exceptions in generating the RDF (AllDarwinCoreTerms as a composite information element isn't supported yet, so grep is used to exclude lines in the csv containing that value".
