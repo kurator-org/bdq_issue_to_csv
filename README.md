@@ -65,8 +65,11 @@ the test-util.sh utility in kurator-ffdq):
 And for supplementary tests: 
 
     cd ../bdq_issue_to_csv
-	wget "https://api.github.com/repos/tdwg/bdq/issues?labels=Supplementary&per_page=100&state=all" -O supplementalissuelist.json
-	java -jar target/issueconverter-0.0.5-SNAPSHOT-jar-with-dependencies.jar -f supplementalissuelist.json
-	cp ./output.csv ../tg2/supplementary/TG2_supplementary_tests.csv
+    wget "https://api.github.com/repos/tdwg/bdq/issues?labels=Supplementary&per_page=100&state=all" -O supplementalissuelist.json
+    java -jar target/issueconverter-0.0.5-SNAPSHOT-jar-with-dependencies.jar -f supplementalissuelist.json
+    cp ./output.csv ../bdq/tg2/supplementary/TG2_supplementary_tests.csv
+    cd ../kurator-ffdq
+    grep -v "AllDarwin" ../bdq/tg2/supplementary/TG2_supplementary_tests.csv  > data/TG2_supplementary_tests.csv
+    ./test-util.sh -config data/tg2_tests.properties -format RDFXML -out ../bdq/tg2/supplementary/TG2_supplementary_tests.xml -in data/TG2_supplementary_tests.csv
 
 Note, values that do not fit the expections of the controlled vocabularies used in kurator-ffdq may cause rows to be skipped or may cause fatal exceptions in generating the RDF (AllDarwinCoreTerms as a composite information element isn't supported yet, so grep is used to exclude lines in the csv containing that value".
