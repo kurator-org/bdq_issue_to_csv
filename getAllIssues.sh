@@ -13,4 +13,4 @@ wget "https://api.github.com/repos/tdwg/bdq/issues?labels=Supplementary&per_page
 
 java -jar target/issueconverter-0.0.5-SNAPSHOT-jar-with-dependencies.jar -f supplementalissuelist.json
 
-cp output.csv ../tg2/supplementary/TG2_supplementary_tests.csv
+cp output.csv ../bdq/tg2/supplementary/TG2_supplementary_tests.csv
