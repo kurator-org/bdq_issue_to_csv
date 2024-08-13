@@ -27,9 +27,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -211,11 +213,17 @@ public class BDQConvert {
 
 			InputStream is;
 			OutputStream os;
+			OutputStream osMeasures;
 			try {
+				String measureFilename = "multirecord_measures.csv";
 				os = new FileOutputStream("output.csv");
+				osMeasures = new FileOutputStream(measureFilename);
 
 				CSVPrinter outputPrinter = new CSVPrinter(new FileWriter("output.csv", true), CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL));
 				outputPrinter.printRecord(outputHeaders);
+				
+				CSVPrinter outputPrinterMeasures = new CSVPrinter(new FileWriter(measureFilename, true), CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL));
+				outputPrinterMeasures.printRecord(outputHeaders);
 
 				is = new FileInputStream(file);
 				String jsonTxt = IOUtils.toString(is, "UTF-8");
@@ -477,12 +485,62 @@ public class BDQConvert {
 								outputPrinter.print(outputLine.get(key));
 							}
 							outputPrinter.println();
-
+							
 							System.out.println("@Provides(value=\"urn:uuid:" + outputLine.get("GUID")+ "\")");
 							System.out.println("@ProvidesVersion(value=\"https://rs.tdwg.org/bdq/terms/" + outputLine.get("GUID")+ "/" +  outputLine.get("DateLastUpdated") + "\")");
 							System.out.println("@"+frameworkClass+"( label = \"" + outputLine.get("Label") + "\", description=\"" + outputDes + "\")");
 							System.out.println("@Specification(value=\"" + specificationDescription +"\")");
 							System.out.println("");
+
+							// Generate MultiRecord measures for each validation 
+							if (outputLine.get("Type").toUpperCase().equals("VALIDATION")) { 
+								HashMap<String,String>measureLine =  (HashMap<String, String>) outputLine.clone();
+								Iterator<String> imkcopy = outputHeaders.iterator();
+								while (imkcopy.hasNext()) {
+									String key = imkcopy.next();
+									measureLine.put(key, outputLine.get(key));
+								}
+								measureLine.putAll(outputLine);
+								// QA measures of completeness
+								String forValidation = measureLine.get("Label");
+								measureLine.replace("#", "");  // point to single issue for measuring multirecords for compliance
+								measureLine.replace("Type", "Measure");
+								measureLine.replace("Resource Type","MultRecord");
+								String now = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+								measureLine.replace("DateLastUpdated",now);
+								measureLine.replace("Source", "TG2");
+								String labelStart = "MULTIRECORD_MEASURE_QA";
+								measureLine.replace("Label",measureLine.get("Label").toString().replace("VALIDATION", labelStart));
+								measureLine.replace("InformationElement:ActedUpon", forValidation + ".Response");
+								measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT, otherwise NOT_COMPLETE." );
+								measureLine.replace("Description", "Measure if all " + forValidation + " in a record set are COMPLIANT" );
+								measureLine.replace("Notes", "For Quality Assurance, filter record set until this measure is COMPLETE.");
+								measureLine.replace("Parameters", "");
+								measureLine.replace("GUID", "");
+								measureLine.replace("Examples", "");
+								measureLine.replace("References", "Veiga AK, Saraiva AM, Chapman AD, Morris PJ, Gendreau C, Schigel D, Robertson TJ (2017). A conceptual framework for quality assessment and management of biodiversity data. PLOS ONE 12(6): e0178731. https://doi.org/10.1371/journal.pone.0178731");;
+								measureLine.replace("InformationElement:Consulted","");
+								measureLine.replace("Example Implementations (Mechanisms)", "");
+								measureLine.replace("Link to Specification Source Code", "");
+								Iterator<String> imk = outputHeaders.iterator();
+								while (imk.hasNext()) {
+									String key = imk.next();
+									outputPrinterMeasures.print(measureLine.get(key));
+								}
+								// QC measures with counts
+								outputPrinterMeasures.println();
+								measureLine.replace("#", "");  // point to single issue for multirecord measures with counts
+								measureLine.replace("Label",measureLine.get("Label").toString().replace(labelStart, "MULTIRECORD_MEASURE_COUNT_COMPLIANT"));
+								measureLine.replace("Specification", "Count the number of " + forValidation + " in the MultiRecord that have Response.result=COMPLIANT." );
+								measureLine.replace("Description", "Count the number of " + forValidation + " in a record set that are COMPLIANT" );
+								measureLine.replace("Notes", "For Quality Control, compare the Response.result of this measure with the total number of records to assess work needed on the record set.");
+								imk = outputHeaders.iterator();
+								while (imk.hasNext()) {
+									String key = imk.next();
+									outputPrinterMeasures.print(measureLine.get(key));
+								}
+								outputPrinterMeasures.println();
+							}
 
 						} else { 
 							System.out.println("// #" + Integer.toString(number) + ", not written, lacks a label ");	            
@@ -490,6 +548,7 @@ public class BDQConvert {
 					} // end produce output (has labels specifying test is to be used.
 				} // end loop through issues 
 				outputPrinter.close();
+				outputPrinterMeasures.close();
 
 				/**	
 	        Set<String> keySet = allkeys.keySet();
