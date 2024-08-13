@@ -248,7 +248,7 @@ public class BDQConvert {
 					for (CSVRecord csvRecord : guidReader) {
 						String guid = csvRecord.get("GUID");
 						String label = csvRecord.get("Label");
-						logger.debug(label + ":" + guid);
+						//logger.debug(label + ":" + guid);
 						measureGuids.put(label, guid);
 					}
 				}
@@ -536,13 +536,13 @@ public class BDQConvert {
 									String forValidation = measureLine.get("Label");
 									measureLine.replace("#", "295");  // point to single issue for measuring multirecords for compliance
 									measureLine.replace("Type", "Measure");
-									measureLine.replace("Resource Type","MultRecord");
+									measureLine.replace("Resource Type","MultiRecord");
 									String now = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 									measureLine.replace("DateLastUpdated",now);
 									measureLine.replace("Source", "TG2");
 									String labelStart = "MULTIRECORD_MEASURE_QA";
 									measureLine.replace("Label",measureLine.get("Label").toString().replace("VALIDATION", labelStart));
-									measureLine.replace("InformationElement:ActedUpon", forValidation + ".Response");
+									measureLine.replace("InformationElement:ActedUpon", "bdq:"+ forValidation + ".Response");
 									measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT, otherwise NOT_COMPLETE." );
 									measureLine.replace("Description", "Measure if all " + forValidation + " in a record set are COMPLIANT" );
 									measureLine.replace("Notes", "For Quality Assurance, filter record set until this measure is COMPLETE.");
