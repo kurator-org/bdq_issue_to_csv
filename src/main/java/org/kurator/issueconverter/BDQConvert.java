@@ -256,6 +256,8 @@ public class BDQConvert {
 					}
 					if (issueLabels.toString().contains("DO NOT IMPLEMENT")) { 
 						// skip this test, do not add to output spreadsheet.
+					} else if (issueLabels.toString().contains("Template")) { 
+						// template issues for generated measures, skip
 					} else { 
 						// generate output
 
