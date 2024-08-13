@@ -83,6 +83,7 @@ public class BDQConvert {
 	private static boolean regenerateMultiRecord = true;
 	
 	private static Map<String,String> measureGuids;
+	private static List<String> measuresAllowingIPNM;  // list of measures that allow Internal Prerequsites Not Met to be complete.
 	
 	/**
 	 * main method, expected entry point, launched from command line.
@@ -238,6 +239,7 @@ public class BDQConvert {
 				
 				CSVPrinter outputPrinterMeasures = null;
 				if (regenerateMultiRecord) { 
+					measuresAllowingIPNM = new ArrayList<String>();
 					outputPrinterMeasures = new CSVPrinter(new FileWriter(measureFilename, true), CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL));
 					outputPrinterMeasures.printRecord(outputHeaders);
 					
@@ -250,6 +252,14 @@ public class BDQConvert {
 						String label = csvRecord.get("Label");
 						//logger.debug(label + ":" + guid);
 						measureGuids.put(label, guid);
+						try { 
+							String allowIPNM = csvRecord.get("AllowIPNM");
+							if (allowIPNM.equals("Yes")) { 
+								measuresAllowingIPNM.add(label);
+							}
+						} catch (Exception e) { 
+							logger.debug(e.getMessage());
+						}
 					}
 				}
 				
@@ -542,14 +552,21 @@ public class BDQConvert {
 									measureLine.replace("Source", "TG2");
 									String labelStart = "MULTIRECORD_MEASURE_QA";
 									measureLine.replace("Label",measureLine.get("Label").toString().replace("VALIDATION", labelStart));
+									String label = measureLine.get("Label");
 									measureLine.replace("InformationElement:ActedUpon", "bdq:"+ forValidation + ".Response");
-									measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT, otherwise NOT_COMPLETE." );
-									measureLine.replace("Description", "Measure if all " + forValidation + " in a record set are COMPLIANT" );
+									if (measureGuids.containsKey(label) && measuresAllowingIPNM.contains(label))  {
+										measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT or Respone.status=INTERNAL_PREREQUSITES_NOT_MET, otherwise NOT_COMPLETE." );
+										measureLine.replace("Description", "Measure if all " + forValidation + " in a record set are COMPLIANT or INTERNAL_PREREQUSITES_NOT_MET (indicating some empty value)" );
+									} else { 
+										measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT; otherwise NOT_COMPLETE." );
+										measureLine.replace("Description", "Measure if all " + forValidation + " in a record set are COMPLIANT" );
+									}
 									measureLine.replace("Notes", "For Quality Assurance, filter record set until this measure is COMPLETE.");
 									measureLine.replace("Parameters", "");
-									if (measureGuids.containsKey(measureLine.get("Label"))) {
-										measureLine.replace("GUID", measureGuids.get(measureLine.get("Label")));
+									if (measureGuids.containsKey(label)) {
+										measureLine.replace("GUID", measureGuids.get(label));
 									} else { 
+										logger.debug(label + " Not Found");
 										measureLine.replace("GUID", UUID.randomUUID().toString());
 									}
 									measureLine.replace("Examples", "");
@@ -565,8 +582,14 @@ public class BDQConvert {
 									// QC measures with counts
 									outputPrinterMeasures.println();
 									measureLine.replace("#", "296");  // point to single issue for multirecord measures with counts
-									measureLine.replace("GUID", UUID.randomUUID().toString());
 									measureLine.replace("Label",measureLine.get("Label").toString().replace(labelStart, "MULTIRECORD_MEASURE_COUNT_COMPLIANT"));
+									label = measureLine.get("Label");
+									if (measureGuids.containsKey(label)) {
+										measureLine.replace("GUID", measureGuids.get(label));
+									} else { 
+										logger.debug(label + " Not Found");
+										measureLine.replace("GUID", UUID.randomUUID().toString());
+									}
 									measureLine.replace("Specification", "Count the number of " + forValidation + " in the MultiRecord that have Response.result=COMPLIANT." );
 									measureLine.replace("Description", "Count the number of " + forValidation + " in a record set that are COMPLIANT" );
 									measureLine.replace("Notes", "For Quality Control, compare the Response.result of this measure with the total number of records to assess work needed on the record set.");
