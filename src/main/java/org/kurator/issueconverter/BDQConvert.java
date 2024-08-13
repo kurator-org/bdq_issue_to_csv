@@ -503,7 +503,7 @@ public class BDQConvert {
 								measureLine.putAll(outputLine);
 								// QA measures of completeness
 								String forValidation = measureLine.get("Label");
-								measureLine.replace("#", "");  // point to single issue for measuring multirecords for compliance
+								measureLine.replace("#", "295");  // point to single issue for measuring multirecords for compliance
 								measureLine.replace("Type", "Measure");
 								measureLine.replace("Resource Type","MultRecord");
 								String now = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
@@ -529,7 +529,7 @@ public class BDQConvert {
 								}
 								// QC measures with counts
 								outputPrinterMeasures.println();
-								measureLine.replace("#", "");  // point to single issue for multirecord measures with counts
+								measureLine.replace("#", "296");  // point to single issue for multirecord measures with counts
 								measureLine.replace("Label",measureLine.get("Label").toString().replace(labelStart, "MULTIRECORD_MEASURE_COUNT_COMPLIANT"));
 								measureLine.replace("Specification", "Count the number of " + forValidation + " in the MultiRecord that have Response.result=COMPLIANT." );
 								measureLine.replace("Description", "Count the number of " + forValidation + " in a record set that are COMPLIANT" );
