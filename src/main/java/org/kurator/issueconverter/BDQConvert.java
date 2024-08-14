@@ -544,11 +544,6 @@ public class BDQConvert {
 									measureLine.putAll(outputLine);
 									// QA measures of completeness
 									String forValidation = measureLine.get("Label");
-									if (measureGuids.containsKey(label) && measuresAllowingIPNM.contains(label))  {
-										measureLine.replace("#", "297");  // point to single issue for measuring multirecords for compliance
-									} else {  
-									 	measureLine.replace("#", "295");  // point to single issue for measuring multirecords for compliance
-									}
 									measureLine.replace("Type", "Measure");
 									measureLine.replace("Resource Type","MultiRecord");
 									String now = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
@@ -557,6 +552,11 @@ public class BDQConvert {
 									String labelStart = "MULTIRECORD_MEASURE_QA";
 									measureLine.replace("Label",measureLine.get("Label").toString().replace("VALIDATION", labelStart));
 									String label = measureLine.get("Label");
+									if (measureGuids.containsKey(label) && measuresAllowingIPNM.contains(label))  {
+										measureLine.replace("#", "297");  // point to single issue for measuring multirecords for compliance
+									} else {  
+									 	measureLine.replace("#", "295");  // point to single issue for measuring multirecords for compliance
+									}
 									measureLine.replace("InformationElement:ActedUpon", "bdq:"+ forValidation + ".Response");
 									if (measureGuids.containsKey(label) && measuresAllowingIPNM.contains(label))  {
 										measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT or Response.status=INTERNAL_PREREQUISITES_NOT_MET, otherwise NOT_COMPLETE." );
