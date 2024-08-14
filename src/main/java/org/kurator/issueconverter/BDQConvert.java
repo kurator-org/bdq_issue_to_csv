@@ -544,7 +544,11 @@ public class BDQConvert {
 									measureLine.putAll(outputLine);
 									// QA measures of completeness
 									String forValidation = measureLine.get("Label");
-									measureLine.replace("#", "295");  // point to single issue for measuring multirecords for compliance
+									if (measureGuids.containsKey(label) && measuresAllowingIPNM.contains(label))  {
+										measureLine.replace("#", "297");  // point to single issue for measuring multirecords for compliance
+									} else {  
+									 	measureLine.replace("#", "295");  // point to single issue for measuring multirecords for compliance
+									}
 									measureLine.replace("Type", "Measure");
 									measureLine.replace("Resource Type","MultiRecord");
 									String now = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
@@ -555,8 +559,8 @@ public class BDQConvert {
 									String label = measureLine.get("Label");
 									measureLine.replace("InformationElement:ActedUpon", "bdq:"+ forValidation + ".Response");
 									if (measureGuids.containsKey(label) && measuresAllowingIPNM.contains(label))  {
-										measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT or Respone.status=INTERNAL_PREREQUSITES_NOT_MET, otherwise NOT_COMPLETE." );
-										measureLine.replace("Description", "Measure if all " + forValidation + " in a record set are COMPLIANT or INTERNAL_PREREQUSITES_NOT_MET (indicating some empty value)" );
+										measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT or Response.status=INTERNAL_PREREQUISITES_NOT_MET, otherwise NOT_COMPLETE." );
+										measureLine.replace("Description", "Measure if all " + forValidation + " in a record set are COMPLIANT or INTERNAL_PREREQUISITES_NOT_MET (indicating some empty value)" );
 									} else { 
 										measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT; otherwise NOT_COMPLETE." );
 										measureLine.replace("Description", "Measure if all " + forValidation + " in a record set are COMPLIANT" );
