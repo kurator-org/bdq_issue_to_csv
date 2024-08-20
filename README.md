@@ -58,7 +58,7 @@ the test-util.sh utility in kurator-ffdq):
     git clone git@github.com:kurator-org/kurator-ffdq
     cd kurator-ffdq
     mvn package
-    grep -v "AllDarwin" ../bdq/tg2/core/TG2_tests.csv  > data/TG2_tests.csv
+    grep -v "AllAmendmentTestsRunOnSingleRecord" ../bdq/tg2/core/TG2_tests.csv  | grep -v "AllDarwin" > data/TG2_tests.csv
     cp ../bdq/tg2/core/TG2_multirecord_measure_tests.csv data/TG2_multirecord_measure_tests.csv
     ./test-util.sh -config data/tg2_tests.properties -format RDFXML -out ../bdq/tg2/core/TG2_tests.xml -in  data/TG2_tests.csv
     ./test-util.sh -config data/tg2_tests.properties -format RDFXML -out ../bdq/tg2/core/TG2_multirecord_measure_tests.xml -in  data/TG2_multirecord_measure_tests.csv
