@@ -93,7 +93,8 @@ public class BDQConvert {
 
 		Options options = new Options();
 		options.addOption("f", true, "JSON file to convert");		
-		options.addOption("u", true, "UseCase-Test csv file");		
+		options.addOption("u", true, "UseCase-Test csv file");	
+		options.addOption("l", true, "Label Mapping csv file");
 		options.addOption("nm", false, "Don't Regenerate MultiRecordMeasures csv file");
 
 		CommandLineParser parser = new DefaultParser();
@@ -103,11 +104,15 @@ public class BDQConvert {
 			if (cmd.hasOption("u")) { 
 				useCaseFilename = cmd.getOptionValue("u");
 			}
+			String labelMappingFilename = null;
+			if (cmd.hasOption("l")) { 
+				labelMappingFilename = cmd.getOptionValue("l");
+			}
 			if (cmd.hasOption("nm")) { 
 				regenerateMultiRecord = false;
 			}
 			if (cmd.hasOption("f")) { 
-				convert(cmd.getOptionValue("f"), useCaseFilename);
+				convert(cmd.getOptionValue("f"), useCaseFilename, labelMappingFilename);
 			} else {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp( commandLine, options );
@@ -120,7 +125,7 @@ public class BDQConvert {
 
 	}
 
-	protected static void convert(String filename, String useCaseFilename) { 
+	protected static void convert(String filename, String useCaseFilename, String labelMappingFilename) { 
 		logger.debug(filename);
 		File file = new File(filename);
 		logger.debug(file.canRead());
@@ -154,7 +159,29 @@ public class BDQConvert {
 				}
 			}
 		}
-
+		
+		Map<String,String> prefLabelMap = new HashMap<String,String>();
+		if (labelMappingFilename != null && labelMappingFilename.length()>0) {
+			File labelMapFile = new File(labelMappingFilename);
+			logger.debug(labelMapFile.canRead());
+			if (labelMapFile.canRead()) { 
+				try { 
+					FileReader reader = new FileReader(labelMapFile);
+					CSVParser csvParser = new CSVParser(reader,CSVFormat.DEFAULT.withFirstRecordAsHeader());
+					List<CSVRecord> labelList = csvParser.getRecords();
+					Iterator<CSVRecord> i = labelList.iterator();
+					while (i.hasNext()) { 
+						CSVRecord useCaseRecord = i.next();
+						String guid = useCaseRecord.get("GUID").trim();
+						String prefLabel = useCaseRecord.get("Preferred Label");
+						prefLabelMap.put(guid, prefLabel);
+					}
+					includeUseCases = true;
+				} catch (IOException e) { 
+					logger.error(e.getMessage());
+				}
+			}
+		}
 		if (file.canRead()) { 
 
 			/**
@@ -163,6 +190,8 @@ public class BDQConvert {
 			DQ Dimension,Severity,Warning Type,Source,References,Specification Last Updated, Example Implementations (Mechanisms),
 			Link to Specification Source Code,Comments and Questions,Notes ,			
 			 **/	
+			// Add use cases
+			// Add skos:prefLabel
 
 			// Headers as they are to be produced in the output csv.
 			ArrayList<String> outputHeaders = new ArrayList<String>();
@@ -171,6 +200,7 @@ public class BDQConvert {
 			outputHeaders.add("GUID");  // GUID, machine readable identifier for test
 			outputHeaders.add("DateLastUpdated");  // Most recent modification date for test
 			outputHeaders.add("Label");  // Variable, human readable identifier for test
+			outputHeaders.add("prefLabel");  // skos preferred label (skos:prefLabel) for test
 			// outputHeaders.add("IE Category");  // broad concepts the information elements fall into ** Deprecated **
 			outputHeaders.add("IE Class");   // Darwin Core class(es) the information elements fall into
 			// outputHeaders.add("Information Element");   // Framework concept, the list of Darwin Core terms forming specific information elements
@@ -384,6 +414,11 @@ public class BDQConvert {
 								if (key.equals("GUID")) { 
 									outputLine.put("GUID", value); 
 									outputLine.put("DateLastUpdated",updated_at);
+									String prefLabel = "Missing prefLabel";
+									if (prefLabelMap.containsKey(value)) { 
+										prefLabel = prefLabelMap.get(value);
+									}
+									outputLine.put("prefLabel",prefLabel);
 								}
 								if (key.equals("Label")) { 
 									outputLine.put("Label", value); 

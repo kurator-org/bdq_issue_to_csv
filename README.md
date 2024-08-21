@@ -50,7 +50,7 @@ the test-util.sh utility in kurator-ffdq):
     wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100"  -O issuelist1.json
     wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100&page=2" -O issuelist2.json
     jq -s 'flatten | group_by(.id) | map(reduce .[] as $x ({}; . * $x))' issuelist1.json issuelist2.json > issuelist.json
-    java -jar ./target/issueconverter-0.0.5-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json -u ../bdq/tg2/core/usecase_test_list.csv
+    java -jar ./target/issueconverter-0.0.5-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json -u ../bdq/tg2/core/usecase_test_list.csv -l ../bdq/tg2/core/test_label_mappings.csv
     cd ~/git
     git clone git@github.com:tdwg/bdq.git
     cp bdq_issue_to_csv/output.csv bdq/tg2/core/TG2_tests.csv
