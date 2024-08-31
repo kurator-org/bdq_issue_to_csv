@@ -77,6 +77,9 @@ public class BDQConvert {
 
 	private static final Log logger = LogFactory.getLog(BDQConvert.class);
 	
+	private static Map<String,String> criterionMap;
+	private static Map<String,String> enhancementMap;
+	
 	/**
 	 * If true, also generate a csv file of measures on MultiRecord for each SingleRecord validation.
 	 */
@@ -84,6 +87,7 @@ public class BDQConvert {
 	
 	private static Map<String,String> measureGuids;
 	private static List<String> measuresAllowingIPNM;  // list of measures that allow Internal Prerequsites Not Met to be complete.
+	
 	
 	/**
 	 * main method, expected entry point, launched from command line.
@@ -96,6 +100,28 @@ public class BDQConvert {
 		options.addOption("u", true, "UseCase-Test csv file");	
 		options.addOption("l", true, "Label Mapping csv file");
 		options.addOption("nm", false, "Don't Regenerate MultiRecordMeasures csv file");
+
+		// maping of last word of term-actions onto criterion
+		criterionMap = new HashMap<String,String>();
+		criterionMap.put("COMPLETE", "Complete");
+		criterionMap.put("CONSISTENT", "Consistent");
+		criterionMap.put("FOUND", "Found");
+		criterionMap.put("INRANGE", "InRange");
+		criterionMap.put("LIKELY", "Likely");
+		criterionMap.put("NOTZERO", "Likely");
+		criterionMap.put("NOTEMPTY", "NotEmpty");
+		criterionMap.put("STANDARD", "Standard");
+		criterionMap.put("INTEGER", "Standard");
+		criterionMap.put("UNAMBIGUOUS", "Unambiguous");
+		
+		// mapping of last word of term-actions onto enhancement
+		enhancementMap = new HashMap<String,String>();
+		enhancementMap.put("ASSUMEDDEFAULT", "AssumedDefault");
+		enhancementMap.put("CONVERTED", "Converted");
+		enhancementMap.put("STANDARDIZED", "Standardized");
+		enhancementMap.put("FROM", "FillInFrom");
+		enhancementMap.put("TRANSPOSED", "Transposed");
+		
 
 		CommandLineParser parser = new DefaultParser();
 		try {
@@ -207,12 +233,17 @@ public class BDQConvert {
 			outputHeaders.add("InformationElement:ActedUpon");   // Framework concept, the list of Darwin Core terms forming specific information elements
 			outputHeaders.add("InformationElement:Consulted");   // Framework concept, the list of Darwin Core terms forming specific information elements
 			outputHeaders.add("Parameters");   // Parameters for tests.  
-			outputHeaders.add("Specification");   // Specification	Framework concept	
+			outputHeaders.add("Specification");   // Specification expected response Framework property	
+			outputHeaders.add("AuthoritiesDefaults");   // Specification authorities and default values Framework property	
 			outputHeaders.add("Description"); // Human readable summary of structured concepts in the test
+			// TODO: Criterion
+			// TODO: Is label for method?
 			outputHeaders.add("Criterion Label"); // Human readable summary of structured concepts in the test
 			outputHeaders.add("Type");  // Output Type  Framework Class: Validation/Amendment/Measure/Issue
 			outputHeaders.add("Resource Type");   // Resource Type Single- or Multi- Record  Framework concept
 			outputHeaders.add("Dimension");	 //DQ Dimension  Framework concept
+			outputHeaders.add("Criterion");  // DQ Criterion for validations
+			outputHeaders.add("Enhancement");  // DQ Enhancement for amendments
 			// outputHeaders.add("Warning Type");  // Warning Type
 			outputHeaders.add("Examples");  // Two examples 
 			outputHeaders.add("Source");  // Source from which the test was originally drawn
@@ -443,7 +474,9 @@ public class BDQConvert {
 								}
 								if (key.equals("Data Quality Dimension")) { outputLine.put("Dimension", value); dqDimension=value; }
 								if (key.equals("Warning Type")) { outputLine.put("Warning Type", value); }
-								if (key.equals("Term-Actions")) { termActions = value; }
+								if (key.equals("Term-Actions")) { 
+									termActions = value; 
+								}
 								if (key.equals("Source")) { outputLine.put("Source", value); }
 								if (key.equals("References")) { outputLine.put("References", value); }
 								if (key.equals("Parameter(s)")) { parameters.add(value); }
@@ -531,11 +564,41 @@ public class BDQConvert {
 							//	        			specification.append(outputDes).append(" Prereqisites: ").append(outputLine.get("Test Prerequisites"));
 							//	        		}
 							outputLine.put("Description", outputDes);
-							if (sourceAuthority !=null) { 
-								specificationDescription = specificationDescription.concat(" ").concat(sourceAuthority);
-							}
 							outputLine.put("Specification", specificationDescription );
+							outputLine.put("AuthoritiesDefaults", sourceAuthority);
 							outputLine.put("Criterion Label", criterionLabel);
+							if (frameworkClass.toUpperCase().equals("VALIDATION") || frameworkClass.toUpperCase().equals("ISSUE")) { 
+								String criterion = termActions.substring(termActions.indexOf("_")+1);
+								logger.debug(criterion);
+								if (criterionMap.containsKey(criterion)) { 
+									outputLine.put("Criterion",criterionMap.get(criterion));
+								} else if (termActions.contains("LESSTHAN_")) { 
+									outputLine.put("Criterion",enhancementMap.get("CONSISTENT"));
+									// special case handling for irregular pattern
+								} else if (termActions.contains("_AFTER")) { 
+									// special case handling for irregular pattern
+									outputLine.put("Criterion",enhancementMap.get("CONSISTENT"));
+								} else if (termActions.contains("TERRESTRIALMARINE")) { 
+									// special case handling for irregular pattern
+									outputLine.put("Criterion",enhancementMap.get("CONSISTENT"));
+								} else if (termActions.contains("_CENTEROFCOUNTRY")) { 
+									// special case handling for irregular pattern
+									outputLine.put("Criterion",enhancementMap.get("LIKELY"));
+								} else { 
+								    outputLine.put("Criterion","errorunknown");
+								}
+							}
+							if (frameworkClass.toUpperCase().equals("AMENDMENT")) { 
+								String enhancement = termActions.substring(termActions.indexOf("_")+1);
+								if (enhancementMap.containsKey(enhancement)) { 
+									outputLine.put("Enhancement",enhancementMap.get(enhancement));
+								} else if (termActions.contains("FROM_")) { 
+									// special case handling for alternative pattern
+									outputLine.put("Enhancement",enhancementMap.get("FROM"));
+								} else { 
+								    outputLine.put("Enhancement","errorunknown");
+								}
+							}
 							StringBuilder parameterString = new StringBuilder();
 							Iterator<String> iparam =parameters.iterator();
 							String paramSeparator = "";
@@ -584,6 +647,8 @@ public class BDQConvert {
 									String now = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 									measureLine.replace("DateLastUpdated",now);
 									measureLine.replace("Source", "TG2");
+									measureLine.replace("Criterion", ""); // not applicable to measures
+									measureLine.replace("Enhancement", ""); // not applicable to measures
 									String labelStart = "MULTIRECORD_MEASURE_QA";
 									measureLine.replace("Label",measureLine.get("Label").toString().replace("VALIDATION", labelStart));
 									String label = measureLine.get("Label");
