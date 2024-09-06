@@ -573,17 +573,17 @@ public class BDQConvert {
 								if (criterionMap.containsKey(criterion)) { 
 									outputLine.put("Criterion",criterionMap.get(criterion));
 								} else if (termActions.contains("LESSTHAN_")) { 
-									outputLine.put("Criterion",enhancementMap.get("CONSISTENT"));
+									outputLine.put("Criterion",criterionMap.get("CONSISTENT"));
 									// special case handling for irregular pattern
 								} else if (termActions.contains("_AFTER")) { 
 									// special case handling for irregular pattern
-									outputLine.put("Criterion",enhancementMap.get("CONSISTENT"));
+									outputLine.put("Criterion",criterionMap.get("CONSISTENT"));
 								} else if (termActions.contains("TERRESTRIALMARINE")) { 
 									// special case handling for irregular pattern
-									outputLine.put("Criterion",enhancementMap.get("CONSISTENT"));
+									outputLine.put("Criterion",criterionMap.get("CONSISTENT"));
 								} else if (termActions.contains("_CENTEROFCOUNTRY")) { 
 									// special case handling for irregular pattern
-									outputLine.put("Criterion",enhancementMap.get("LIKELY"));
+									outputLine.put("Criterion",criterionMap.get("LIKELY"));
 								} else { 
 								    outputLine.put("Criterion","errorunknown");
 								}
