@@ -60,8 +60,8 @@ the test-util.sh utility in kurator-ffdq):
     mvn package
     grep -v "AllAmendmentTestsRunOnSingleRecord" ../bdq/tg2/core/TG2_tests.csv  | grep -v "AllDarwin" > data/TG2_tests.csv
     cp ../bdq/tg2/core/TG2_multirecord_measure_tests.csv data/TG2_multirecord_measure_tests.csv
-    ./test-util.sh -config data/tg2_tests.properties -format RDFXML -out ../bdq/tg2/core/TG2_tests.xml -in  data/TG2_tests.csv -guidFile ../bdq/tg2/core/TG2_tests_additional_guids.csv -useCaseFile ../bdq/tg2/core/usecase_test_list.csv
-    ./test-util.sh -config data/tg2_tests.properties -format RDFXML -out ../bdq/tg2/core/TG2_multirecord_measure_tests.xml -in  data/TG2_multirecord_measure_tests.csv -guidFile ../bdq/tg2/core/TG2_tests_additional_guids.csv -useCaseFile ../bdq/tg2/core/usecase_test_list.csv
+    ./test-util.sh -config data/tg2_tests.properties -format RDFXML -out ../bdq/tg2/core/TG2_tests.xml -in  data/TG2_tests.csv -guidFile ../bdq/tg2/core/TG2_tests_additional_guids.csv -useCaseFile ../bdq/tg2/core/usecase_test_list.csv -ieGuidFile ../bdq/tg2/core/information_element_guids.csv
+    ./test-util.sh -config data/tg2_tests.properties -format RDFXML -out ../bdq/tg2/core/TG2_multirecord_measure_tests.xml -in  data/TG2_multirecord_measure_tests.csv -guidFile ../bdq/tg2/core/TG2_tests_additional_guids.csv -useCaseFile ../bdq/tg2/core/usecase_test_list.csv -ieGuidFile ../bdq/tg2/core/information_element_guids.csv
 
 And for supplementary tests: 
 
@@ -71,6 +71,6 @@ And for supplementary tests:
     cp ./output.csv ../bdq/tg2/supplementary/TG2_supplementary_tests.csv
     cd ../kurator-ffdq
     grep -v "AllDarwin" ../bdq/tg2/supplementary/TG2_supplementary_tests.csv  > data/TG2_supplementary_tests.csv
-    ./test-util.sh -config data/tg2_tests.properties -format RDFXML -out ../bdq/tg2/supplementary/TG2_supplementary_tests.xml -in data/TG2_supplementary_tests.csv
+    ./test-util.sh -config data/tg2_tests.properties -format RDFXML -out ../bdq/tg2/supplementary/TG2_supplementary_tests.xml -in data/TG2_supplementary_tests.csv -ieGuidFile ../bdq/tg2/core/information_element_guids.csv
 
 Note, values that do not fit the expections of the controlled vocabularies used in kurator-ffdq may cause rows to be skipped or may cause fatal exceptions in generating the RDF (AllDarwinCoreTerms as a composite information element isn't supported yet, so grep is used to exclude lines in the csv containing that value".
