@@ -221,11 +221,14 @@ public class BDQConvert {
 
 			// Headers as they are to be produced in the output csv.
 			ArrayList<String> outputHeaders = new ArrayList<String>();
-			outputHeaders.add("#");   // the issue number
-			//  outputHeaders.add("Confirmed");  // Is there a confirmed label, now removed from all records.
-			outputHeaders.add("GUID");  // GUID, machine readable identifier for test
-			outputHeaders.add("DateLastUpdated");  // Most recent modification date for test
 			outputHeaders.add("Label");  // Variable, human readable identifier for test
+			outputHeaders.add("#");   // the issue number  -> to skos:historyNote??
+			outputHeaders.add("iri");   // versioned IRI with date
+			outputHeaders.add("term_iri");   // IRI for term without version
+			outputHeaders.add("issued");   // date issued
+			//  outputHeaders.add("Confirmed");  // Is there a confirmed label, now removed from all records.
+			outputHeaders.add("term_localName");  // GUID, machine readable identifier for test
+			outputHeaders.add("DateLastUpdated");  // Most recent modification date for test
 			outputHeaders.add("prefLabel");  // skos preferred label (skos:prefLabel) for test
 			// outputHeaders.add("IE Category");  // broad concepts the information elements fall into ** Deprecated **
 			outputHeaders.add("IE Class");   // Darwin Core class(es) the information elements fall into
@@ -258,7 +261,7 @@ public class BDQConvert {
 
 			// Headers as they appear as keys in the key/value markdown table in the issues
 			ArrayList<String> headers = new ArrayList<String>();
-			headers.add("GUID");  // GUID
+			headers.add("GUID");  // GUID --> term_localName
 			headers.add("Label");  // Variable
 			// headers.add("Output Type");  // Output Type   Class: Validation/Amendment/Measure  ** Changing to TestType **
 			headers.add("TestType");  // Output Type   Class: Validation/Amendment/Measure
@@ -363,6 +366,7 @@ public class BDQConvert {
 						HashMap<String,String> csvLine = new HashMap<String,String>(); 
 						HashMap<String,String> outputLine = new HashMap<String,String>();
 						outputLine.put("#", Integer.toString(number));
+						outputLine.put("issued", updated_at);
 						outputLine.put("IssueState", state);
 						outputLine.put("IssueLabels", issueLabels.toString());
 						if (issueLabels.toString().contains("CONFIRMED")) { 
@@ -443,8 +447,9 @@ public class BDQConvert {
 								String value = csvLine.get(key);
 
 								if (key.equals("GUID")) { 
-									outputLine.put("GUID", value); 
-									outputLine.put("DateLastUpdated",updated_at);
+									outputLine.put("term_localName", value); 
+									outputLine.put("term_iri","https://rs.tdwg.org/bdqcore/terms/" + value);
+									outputLine.put("iri","https://rs.tdwg.org/bdqcore/terms/version/" + value + "-" + updated_at);
 									String prefLabel = "Missing prefLabel";
 									if (prefLabelMap.containsKey(value)) { 
 										prefLabel = prefLabelMap.get(value);
@@ -455,6 +460,9 @@ public class BDQConvert {
 									outputLine.put("Label", value); 
 									testLabel = value;
 								}
+								if (key.equals("Specification Last Updated")) { 
+									outputLine.put("DateLastUpdated", value); 
+								}								
 								//if (key.equals("Output Type")) { 
 								//	outputLine.put("Type", value);
 								//	frameworkClass = value;
@@ -645,8 +653,8 @@ public class BDQConvert {
 									String origPrefLabel = measureLine.get("prefLabel");
 									measureLine.replace("Type", "Measure");
 									measureLine.replace("Resource Type","MultiRecord");
-									String now = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
-									measureLine.replace("DateLastUpdated",now);
+									// String now = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
+									// measureLine.replace("DateLastUpdated",now);
 									measureLine.replace("Source", "TG2");
 									measureLine.replace("Criterion", ""); // not applicable to measures
 									measureLine.replace("Enhancement", ""); // not applicable to measures
@@ -670,10 +678,15 @@ public class BDQConvert {
 									measureLine.replace("Notes", "For Quality Assurance, filter record set until this measure is COMPLETE.");
 									measureLine.replace("Parameters", "");
 									if (measureGuids.containsKey(label)) {
-										measureLine.replace("GUID", measureGuids.get(label));
+										measureLine.replace("term_localName", measureGuids.get(label));
+										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqcore/terms/" + measureGuids.get(label));
+										measureLine.replace("iri", "https://rs.tdwg.org/bdqcore/terms/version/" + measureGuids.get(label) + "-" + updated_at);
 									} else { 
 										logger.debug(label + " Not Found");
-										measureLine.replace("GUID", UUID.randomUUID().toString());
+										String mintedGuid =  UUID.randomUUID().toString();
+										measureLine.replace("term_localName", mintedGuid);
+										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqcore/terms/" + mintedGuid);
+										measureLine.replace("iri", "https://rs.tdwg.org/bdqcore/terms/version/" + mintedGuid + "-" + updated_at);
 									}
 									measureLine.replace("Examples", "");
 									measureLine.replace("References", "Veiga AK, Saraiva AM, Chapman AD, Morris PJ, Gendreau C, Schigel D, Robertson TJ (2017). A conceptual framework for quality assessment and management of biodiversity data. PLOS ONE 12(6): e0178731. https://doi.org/10.1371/journal.pone.0178731");;
@@ -692,10 +705,15 @@ public class BDQConvert {
 									measureLine.replace("prefLabel", "Measurement over MultiRecord Counting Compliance of " + origPrefLabel);
 									label = measureLine.get("Label");
 									if (measureGuids.containsKey(label)) {
-										measureLine.replace("GUID", measureGuids.get(label));
+										measureLine.replace("term_localName", measureGuids.get(label));
+										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqcore/terms/" + measureGuids.get(label));
+										measureLine.replace("iri", "https://rs.tdwg.org/bdqcore/terms/version/" + measureGuids.get(label) + "-" + updated_at);
 									} else { 
 										logger.debug(label + " Not Found");
-										measureLine.replace("GUID", UUID.randomUUID().toString());
+										String mintedGuid =  UUID.randomUUID().toString();
+										measureLine.replace("term_localName", mintedGuid);
+										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqcore/terms/" + mintedGuid);
+										measureLine.replace("iri", "https://rs.tdwg.org/bdqcore/terms/version/" + mintedGuid + "-" + updated_at);
 									}
 									measureLine.replace("Specification", "Count the number of " + forValidation + " in the MultiRecord that have Response.result=COMPLIANT." );
 									measureLine.replace("Description", "Count the number of " + forValidation + " in a record set that are COMPLIANT" );
