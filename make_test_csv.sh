@@ -9,7 +9,7 @@ if [ $ok = "true" ]; then
 	wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100"  -O issuelist1.json
 	wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100&page=2" -O issuelist2.json
 	jq -s 'flatten | group_by(.id) | map(reduce .[] as $x ({}; . * $x))' issuelist1.json issuelist2.json > issuelist.json
-	java -jar ./target/issueconverter-0.0.5-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json -u ../bdq/tg2/core/usecase_test_list.csv -l ../bdq/tg2/core/test_label_mappings.csv
+	java -jar ./target/issueconverter-1.0.0-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json -u ../bdq/tg2/core/usecase_test_list.csv -l ../bdq/tg2/core/test_label_mappings.csv
 	cd ../
 	cp bdq_issue_to_csv/output.csv bdq/tg2/core/TG2_tests.csv
 	cp bdq_issue_to_csv/multirecord_measures.csv bdq/tg2/core/TG2_multirecord_measure_tests.csv
