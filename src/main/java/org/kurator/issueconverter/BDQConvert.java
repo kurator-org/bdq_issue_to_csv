@@ -99,6 +99,7 @@ public class BDQConvert {
 		options.addOption("f", true, "JSON file to convert");		
 		options.addOption("u", true, "UseCase-Test csv file");	
 		options.addOption("l", true, "Label Mapping csv file");
+		options.addOption("a", true, "Argument Mapping csv file");
 		options.addOption("nm", false, "Don't Regenerate MultiRecordMeasures csv file");
 
 		// maping of last word of term-actions onto criterion
@@ -134,11 +135,15 @@ public class BDQConvert {
 			if (cmd.hasOption("l")) { 
 				labelMappingFilename = cmd.getOptionValue("l");
 			}
+			String argumentMappingFilename = null;
+			if (cmd.hasOption("a")) { 
+				argumentMappingFilename = cmd.getOptionValue("l");
+			}			
 			if (cmd.hasOption("nm")) { 
 				regenerateMultiRecord = false;
 			}
 			if (cmd.hasOption("f")) { 
-				convert(cmd.getOptionValue("f"), useCaseFilename, labelMappingFilename);
+				convert(cmd.getOptionValue("f"), useCaseFilename, labelMappingFilename, argumentMappingFilename);
 			} else {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp( commandLine, options );
@@ -151,12 +156,13 @@ public class BDQConvert {
 
 	}
 
-	protected static void convert(String filename, String useCaseFilename, String labelMappingFilename) { 
+	protected static void convert(String filename, String useCaseFilename, String labelMappingFilename, String argumentMappingFilename) { 
 		logger.debug(filename);
 		File file = new File(filename);
 		logger.debug(file.canRead());
 		logger.debug(useCaseFilename);
 		boolean includeUseCases = false;
+		boolean includeArgumentGuids = false;
 		MultiValuedMap<String, String> useCaseMap = new HashSetValuedHashMap<>();
 		if (useCaseFilename != null && useCaseFilename.length()>0) {
 			File useCaseFile = new File(useCaseFilename);
@@ -180,6 +186,30 @@ public class BDQConvert {
 						}
 					}
 					includeUseCases = true;
+				} catch (IOException e) { 
+					logger.error(e.getMessage());
+				}
+			}
+		}
+		
+		Map<String,String> argumentMap = new HashMap<String,String>();
+		if (argumentMappingFilename != null && argumentMappingFilename.length()>0) {
+			File argumentMappingFile = new File(argumentMappingFilename);
+			logger.debug(argumentMappingFile.canRead());
+			if (argumentMappingFile.canRead()) { 
+				try { 
+					FileReader reader = new FileReader(argumentMappingFile);
+					CSVParser csvParser = new CSVParser(reader,CSVFormat.DEFAULT.withFirstRecordAsHeader());
+					List<CSVRecord> argumentList = csvParser.getRecords();
+					Iterator<CSVRecord> i = argumentList.iterator();
+					while (i.hasNext()) { 
+						CSVRecord argumentRecord = i.next();
+						String guid = argumentRecord.get("Argument").trim();
+						String label = argumentRecord.get("Label");
+						String spec = argumentRecord.get("Specification");
+						argumentMap.put(label + spec, guid); // concatenated label for argument and specification guid are the key, value is the argument guid
+					}
+					includeArgumentGuids = true;
 				} catch (IOException e) { 
 					logger.error(e.getMessage());
 				}
@@ -221,10 +251,11 @@ public class BDQConvert {
 
 			// Headers as they are to be produced in the output csv.
 			ArrayList<String> outputHeaders = new ArrayList<String>();
-			outputHeaders.add("Label");  // Variable, human readable identifier for test
-			outputHeaders.add("#");   // the issue number  -> to skos:historyNote??
-			outputHeaders.add("iri");   // versioned IRI with date
-			outputHeaders.add("term_iri");   // IRI for term without version
+			outputHeaders.add("Label");  // Variable, human readable identifier for test --> rdfs:label
+			outputHeaders.add("issueNumber");   // the issue number (unused downstream)
+			outputHeaders.add("historyNoteUrl") ;  //  -> to skos:historyNote
+			outputHeaders.add("iri");   // versioned IRI with date 
+			outputHeaders.add("term_iri");   // IRI for term without version  --> 
 			outputHeaders.add("issued");   // date issued
 			//  outputHeaders.add("Confirmed");  // Is there a confirmed label, now removed from all records.
 			outputHeaders.add("term_localName");  // GUID, machine readable identifier for test
@@ -237,27 +268,28 @@ public class BDQConvert {
 			outputHeaders.add("InformationElement:Consulted");   // Framework concept, the list of Darwin Core terms forming specific information elements
 			outputHeaders.add("Parameters");   // Parameters for tests.  
 			outputHeaders.add("Specification");   // Specification expected response Framework property	
+			outputHeaders.add("SpecificationGuid"); // uuid for the Specification
 			outputHeaders.add("AuthoritiesDefaults");   // Specification authorities and default values Framework property	
-			outputHeaders.add("Description"); // Human readable summary of structured concepts in the test
-			// TODO: Criterion
-			// TODO: Is label for method?
-			outputHeaders.add("Criterion Label"); // Human readable summary of structured concepts in the test
-			outputHeaders.add("Type");  // Output Type  Framework Class: Validation/Amendment/Measure/Issue
-			outputHeaders.add("Resource Type");   // Resource Type Single- or Multi- Record  Framework concept
-			outputHeaders.add("Dimension");	 //DQ Dimension  Framework concept
-			outputHeaders.add("Criterion");  // DQ Criterion for validations
-			outputHeaders.add("Enhancement");  // DQ Enhancement for amendments
+			outputHeaders.add("Description"); // Human readable summary of structured concepts in the test --> rdfs:comment on DataQualityNeed
+			// TODO: Unused, replace
+			outputHeaders.add("Criterion Label"); // Human readable summary of structured concepts in the test 
+			outputHeaders.add("Type");  // Output Type  Framework Class: Validation/Amendment/Measure/Issue  -->rdf:type
+			outputHeaders.add("Resource Type");   // Resource Type Single- or Multi- Record  Framework concept bdqffdq;hasResourcetype
+			outputHeaders.add("Dimension");	 //DQ Dimension  Framework concept  --> bdqffdq:hasDataQualityDimension
+			outputHeaders.add("Criterion");  // DQ Criterion for validations  --> bdqffdq:hasCriterion
+			outputHeaders.add("Enhancement");  // DQ Enhancement for amendments  --> bdqffdq:hasEnhancement
 			// outputHeaders.add("Warning Type");  // Warning Type
-			outputHeaders.add("Examples");  // Two examples 
+			outputHeaders.add("Examples");  // Two examples --> skos;example 
 			outputHeaders.add("Source");  // Source from which the test was originally drawn
 			// outputHeaders.add("Test Prerequisites");  // No longer present, merged into specification
-			outputHeaders.add("References");  // References 
+			outputHeaders.add("References");  // References -> dcterms:bibliographicCitation
 			outputHeaders.add("Example Implementations (Mechanisms)");  // Mechanisms 
 			outputHeaders.add("Link to Specification Source Code"); //Link to Specification Source Code
-			outputHeaders.add("Notes");   // Notes		
-			outputHeaders.add("IssueState");  // open or closed
-			outputHeaders.add("IssueLabels");  // Labels present on the github issue.
-			outputHeaders.add("UseCases"); // UseCases the test is included in	
+			outputHeaders.add("Notes");   // Notes -> skos:historyNote
+			outputHeaders.add("IssueState");  // open or closed  --> unused
+			outputHeaders.add("IssueLabels");  // Labels present on the github issue. --> unused
+			outputHeaders.add("UseCases"); // UseCases the test is included in 
+			outputHeaders.add("ArgumentGuids"); // List of guids for arguments parsed from authoritiesDefaults	
 
 			// Headers as they appear as keys in the key/value markdown table in the issues
 			ArrayList<String> headers = new ArrayList<String>();
@@ -339,6 +371,7 @@ public class BDQConvert {
 					JSONObject element = jsonArray.getJSONObject(x);
 					String body = (String) element.get("body");	        	
 					Integer number = (Integer) element.get("number");
+					String historyNoteUrl = element.getString("url");
 					String state = (String) element.get("state");
 					String updated_at = (String) element.get("updated_at");
 					if (updated_at.length()>10) { 
@@ -365,7 +398,8 @@ public class BDQConvert {
 
 						HashMap<String,String> csvLine = new HashMap<String,String>(); 
 						HashMap<String,String> outputLine = new HashMap<String,String>();
-						outputLine.put("#", Integer.toString(number));
+						outputLine.put("issueNumber", Integer.toString(number));
+						outputLine.put("historyNoteUrl", historyNoteUrl);
 						outputLine.put("issued", updated_at);
 						outputLine.put("IssueState", state);
 						outputLine.put("IssueLabels", issueLabels.toString());
@@ -624,6 +658,10 @@ public class BDQConvert {
 									ucSeparator = ", ";
 								}
 								outputLine.put("UseCases", useCases.toString());
+							}
+							if (includeArgumentGuids) { 
+								StringBuilder argumentGuids = new StringBuilder();
+								// TODO: List of guids for argument labels + specification guids 
 							}
 							Iterator<String> iok = outputHeaders.iterator();
 							while (iok.hasNext()) {
