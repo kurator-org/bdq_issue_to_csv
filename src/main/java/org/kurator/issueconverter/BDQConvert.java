@@ -267,7 +267,7 @@ public class BDQConvert {
 			outputHeaders.add("InformationElement:ActedUpon");   // Framework concept, the list of Darwin Core terms forming specific information elements
 			outputHeaders.add("InformationElement:Consulted");   // Framework concept, the list of Darwin Core terms forming specific information elements
 			outputHeaders.add("Parameters");   // Parameters for tests.  
-			outputHeaders.add("Specification");   // Specification expected response Framework property	
+			outputHeaders.add("ExpectedResponse");   // Specification expected response Framework property	
 			outputHeaders.add("SpecificationGuid"); // uuid for the Specification
 			outputHeaders.add("AuthoritiesDefaults");   // Specification authorities and default values Framework property	
 			outputHeaders.add("Description"); // Human readable summary of structured concepts in the test --> rdfs:comment on DataQualityNeed
@@ -302,7 +302,7 @@ public class BDQConvert {
 			// headers.add("Information Elements");  // replaced with ActedUpon/Consulted
 			headers.add("Information Elements ActedUpon");    
 			headers.add("Information Elements Consulted");    
-			headers.add("Expected Response");  // specification, replaces pass/fail descriptiosn and prerequisites.
+			headers.add("Expected Response");  // specification expected response, replaces pass/fail descriptiosn and prerequisites.
 			// headers.add("Dimension");  // Information Element Category   ** To be removed ** 
 			headers.add("Data Quality Dimension");	 //DQ Dimension
 			headers.add("Term-Actions");  
@@ -606,7 +606,7 @@ public class BDQConvert {
 							//	        			specification.append(outputDes).append(" Prereqisites: ").append(outputLine.get("Test Prerequisites"));
 							//	        		}
 							outputLine.put("Description", outputDes);
-							outputLine.put("Specification", specificationDescription );
+							outputLine.put("ExpectedResponse", specificationDescription );
 							outputLine.put("AuthoritiesDefaults", sourceAuthority);
 							outputLine.put("Criterion Label", criterionLabel);
 							if (frameworkClass.toUpperCase().equals("VALIDATION") || frameworkClass.toUpperCase().equals("ISSUE")) { 
