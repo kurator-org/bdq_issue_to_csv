@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.HashSet;
 
 import org.apache.commons.lang3.StringUtils;
@@ -99,6 +101,7 @@ public class BDQConvert {
 		options.addOption("f", true, "JSON file to convert");		
 		options.addOption("u", true, "UseCase-Test csv file");	
 		options.addOption("l", true, "Label Mapping csv file");
+		options.addOption("g", true, "Additional Guid Mapping csv file");
 		options.addOption("a", true, "Argument Mapping csv file");
 		options.addOption("nm", false, "Don't Regenerate MultiRecordMeasures csv file");
 
@@ -135,15 +138,19 @@ public class BDQConvert {
 			if (cmd.hasOption("l")) { 
 				labelMappingFilename = cmd.getOptionValue("l");
 			}
+			String guidMappingFilename = null;
+			if (cmd.hasOption("g")) { 
+				guidMappingFilename = cmd.getOptionValue("g");
+			}
 			String argumentMappingFilename = null;
 			if (cmd.hasOption("a")) { 
-				argumentMappingFilename = cmd.getOptionValue("l");
+				argumentMappingFilename = cmd.getOptionValue("a");
 			}			
 			if (cmd.hasOption("nm")) { 
 				regenerateMultiRecord = false;
 			}
 			if (cmd.hasOption("f")) { 
-				convert(cmd.getOptionValue("f"), useCaseFilename, labelMappingFilename, argumentMappingFilename);
+				convert(cmd.getOptionValue("f"), useCaseFilename, labelMappingFilename, guidMappingFilename, argumentMappingFilename);
 			} else {
 				HelpFormatter formatter = new HelpFormatter();
 				formatter.printHelp( commandLine, options );
@@ -156,13 +163,14 @@ public class BDQConvert {
 
 	}
 
-	protected static void convert(String filename, String useCaseFilename, String labelMappingFilename, String argumentMappingFilename) { 
+	protected static void convert(String filename, String useCaseFilename, String labelMappingFilename, String guidMappingFilename, String argumentMappingFilename) { 
 		logger.debug(filename);
 		File file = new File(filename);
 		logger.debug(file.canRead());
 		logger.debug(useCaseFilename);
 		boolean includeUseCases = false;
 		boolean includeArgumentGuids = false;
+		boolean includeAdditionalGuids = false;
 		MultiValuedMap<String, String> useCaseMap = new HashSetValuedHashMap<>();
 		if (useCaseFilename != null && useCaseFilename.length()>0) {
 			File useCaseFile = new File(useCaseFilename);
@@ -192,6 +200,35 @@ public class BDQConvert {
 			}
 		}
 		
+		Map<String,String> specificationMap = new HashMap<String,String>();
+		Map<String,String> methodMap = new HashMap<String,String>();
+		Map<String,String> policyMap = new HashMap<String,String>();
+		if (guidMappingFilename != null && guidMappingFilename.length()>0) {
+			File guidMappingFile = new File(guidMappingFilename);
+			logger.debug(guidMappingFile.canRead());
+			if (guidMappingFile.canRead()) { 
+				try { 
+					FileReader reader = new FileReader(guidMappingFile);
+					CSVParser csvParser = new CSVParser(reader,CSVFormat.DEFAULT.withFirstRecordAsHeader());
+					List<CSVRecord> argumentList = csvParser.getRecords();
+					Iterator<CSVRecord> i = argumentList.iterator();
+					while (i.hasNext()) { 
+						CSVRecord argumentRecord = i.next();
+						String guid = argumentRecord.get("GUID").trim();
+						String method = argumentRecord.get("Method");
+						String spec = argumentRecord.get("Specification");
+						String policy = argumentRecord.get("Policy");
+						specificationMap.put(guid, spec);
+						methodMap.put(guid, method);
+						policyMap.put(guid, policy);
+					}
+					includeAdditionalGuids = true;
+				} catch (IOException e) { 
+					logger.error(e.getMessage());
+				}
+			}
+		}
+		
 		Map<String,String> argumentMap = new HashMap<String,String>();
 		if (argumentMappingFilename != null && argumentMappingFilename.length()>0) {
 			File argumentMappingFile = new File(argumentMappingFilename);
@@ -207,6 +244,7 @@ public class BDQConvert {
 						String guid = argumentRecord.get("Argument").trim();
 						String label = argumentRecord.get("Label");
 						String spec = argumentRecord.get("Specification");
+						logger.debug(label+spec);
 						argumentMap.put(label + spec, guid); // concatenated label for argument and specification guid are the key, value is the argument guid
 					}
 					includeArgumentGuids = true;
@@ -269,6 +307,7 @@ public class BDQConvert {
 			outputHeaders.add("Parameters");   // Parameters for tests.  
 			outputHeaders.add("ExpectedResponse");   // Specification expected response Framework property	
 			outputHeaders.add("SpecificationGuid"); // uuid for the Specification
+			outputHeaders.add("MethodGuid"); // uuid for the Method
 			outputHeaders.add("AuthoritiesDefaults");   // Specification authorities and default values Framework property	
 			outputHeaders.add("Description"); // Human readable summary of structured concepts in the test --> rdfs:comment on DataQualityNeed
 			// TODO: Unused, replace
@@ -489,6 +528,14 @@ public class BDQConvert {
 										prefLabel = prefLabelMap.get(value);
 									}
 									outputLine.put("prefLabel",prefLabel);
+									if (includeAdditionalGuids) { 
+										if (specificationMap.containsKey(value)) { 
+											outputLine.put("SpecificationGuid", specificationMap.get(value));
+										}
+										if (methodMap.containsKey(value)) { 
+											outputLine.put("MethodGuid", methodMap.get(value));
+										}
+									}
 								}
 								if (key.equals("Label")) { 
 									outputLine.put("Label", value); 
@@ -566,6 +613,8 @@ public class BDQConvert {
 								if (key.equals("Description")) {  description = value; }
 								//if (key.equals("Pass Description")) {  validationDescription = value; }
 							}
+							
+
 
 							// comma separated list of terms
 							String informationElement = terms.toString().trim().replaceAll(" ",",").replaceAll(",,",",");
@@ -661,8 +710,50 @@ public class BDQConvert {
 							}
 							if (includeArgumentGuids) { 
 								StringBuilder argumentGuids = new StringBuilder();
-								// TODO: List of guids for argument labels + specification guids 
+								String specGuid = outputLine.get("SpecificationGuid");
+								if (specGuid.startsWith("urn:uuid:")) { 
+									specGuid = specGuid.replace("urn:uuid:", "");
+								}
+								// List of guids for argument labels + specification guids 
+								// Parse sourceAuthority, match bits to arguments
+								if (sourceAuthority!=null && sourceAuthority.length()>0) { 
+					    			String pattern = "([a-z:a-zA-Z]+) +default *= *(\"[^\"]*\").*";
+					    			logger.debug(pattern);
+					    			Pattern p = Pattern.compile(pattern);
+									if (sourceAuthority.contains(",")) { 
+										String[] bits = sourceAuthority.split(",");
+										String asep = "";
+										for (int j=0; j< bits.length; j++) { 
+											String bit = bits[j];
+											if (bit.trim().length()>0) { 
+												Matcher m = p.matcher(bit);
+												if (m.matches()) { 
+													String key = "\"Default value for "+m.group(1) + ":" + m.group(2) + "\"" + specGuid;
+													if (argumentMap.containsKey(key)) {
+														argumentGuids.append(asep).append(argumentMap.get(key));
+														asep = ",";
+													}
+												}
+											}
+										}
+										
+									} else { 
+						    			Matcher m = p.matcher(sourceAuthority);
+						    			logger.debug(Boolean.toString(m.matches()));
+						    			if (m.matches()) { 
+						    				logger.debug(m.group(1));
+						    				logger.debug(m.group(2));
+						    				String key = "\"Default value for "+m.group(1) + ":" + m.group(2) + "\"" + specGuid;
+						    				logger.debug(key);
+						    				if (argumentMap.containsKey(key)) {
+						    				  argumentGuids.append(argumentMap.get(key));
+						    				}
+						    			}
+									}
+								}
+								outputLine.put("ArgumentGuids", argumentGuids.toString());
 							}
+							
 							Iterator<String> iok = outputHeaders.iterator();
 							while (iok.hasNext()) {
 								String key = iok.next();
@@ -670,8 +761,8 @@ public class BDQConvert {
 							}
 							outputPrinter.println();
 							
-							System.out.println("@Provides(value=\"urn:uuid:" + outputLine.get("GUID")+ "\")");
-							System.out.println("@ProvidesVersion(value=\"https://rs.tdwg.org/bdq/terms/" + outputLine.get("GUID")+ "/" +  outputLine.get("DateLastUpdated") + "\")");
+							System.out.println("@Provides(value=\"urn:uuid:" + outputLine.get("term_localName")+ "\")");
+							System.out.println("@ProvidesVersion(value=\"https://rs.tdwg.org/bdq/terms/" + outputLine.get("term_localName")+ "/" +  outputLine.get("DateLastUpdated") + "\")");
 							System.out.println("@"+frameworkClass+"( label = \"" + outputLine.get("Label") + "\", description=\"" + outputDes + "\")");
 							System.out.println("@Specification(value=\"" + specificationDescription +"\")");
 							System.out.println("");
