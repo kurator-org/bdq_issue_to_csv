@@ -167,13 +167,13 @@ public class BDQConvert {
 		logger.debug(filename);
 		File file = new File(filename);
 		logger.debug(file.canRead());
-		logger.debug(useCaseFilename);
 		boolean includeUseCases = false;
 		boolean includeArgumentGuids = false;
 		boolean includeAdditionalGuids = false;
 		MultiValuedMap<String, String> useCaseMap = new HashSetValuedHashMap<>();
 		if (useCaseFilename != null && useCaseFilename.length()>0) {
 			File useCaseFile = new File(useCaseFilename);
+			logger.debug(useCaseFilename);
 			logger.debug(useCaseFile.canRead());
 			if (useCaseFile.canRead()) { 
 				try { 
@@ -205,6 +205,7 @@ public class BDQConvert {
 		Map<String,String> policyMap = new HashMap<String,String>();
 		if (guidMappingFilename != null && guidMappingFilename.length()>0) {
 			File guidMappingFile = new File(guidMappingFilename);
+			logger.debug(guidMappingFilename);
 			logger.debug(guidMappingFile.canRead());
 			if (guidMappingFile.canRead()) { 
 				try { 
@@ -718,7 +719,6 @@ public class BDQConvert {
 								// Parse sourceAuthority, match bits to arguments
 								if (sourceAuthority!=null && sourceAuthority.length()>0) { 
 					    			String pattern = "([a-z:a-zA-Z]+) +default *= *(\"[^\"]*\").*";
-					    			logger.debug(pattern);
 					    			Pattern p = Pattern.compile(pattern);
 									if (sourceAuthority.contains(",")) { 
 										String[] bits = sourceAuthority.split(",");
@@ -739,12 +739,8 @@ public class BDQConvert {
 										
 									} else { 
 						    			Matcher m = p.matcher(sourceAuthority);
-						    			logger.debug(Boolean.toString(m.matches()));
 						    			if (m.matches()) { 
-						    				logger.debug(m.group(1));
-						    				logger.debug(m.group(2));
 						    				String key = "\"Default value for "+m.group(1) + ":" + m.group(2) + "\"" + specGuid;
-						    				logger.debug(key);
 						    				if (argumentMap.containsKey(key)) {
 						    				  argumentGuids.append(argumentMap.get(key));
 						    				}
