@@ -311,7 +311,7 @@ public class BDQConvert {
 			outputHeaders.add("MethodGuid"); // uuid for the Method
 			outputHeaders.add("AuthoritiesDefaults");   // Specification authorities and default values Framework property	
 			outputHeaders.add("Description"); // Human readable summary of structured concepts in the test --> rdfs:comment on DataQualityNeed
-			// TODO: Unused, replace
+			// TODO: Unused, remove
 			outputHeaders.add("Criterion Label"); // Human readable summary of structured concepts in the test 
 			outputHeaders.add("Type");  // Output Type  Framework Class: Validation/Amendment/Measure/Issue  -->rdf:type
 			outputHeaders.add("Resource Type");   // Resource Type Single- or Multi- Record  Framework concept bdqffdq;hasResourcetype
