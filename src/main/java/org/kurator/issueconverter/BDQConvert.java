@@ -311,8 +311,7 @@ public class BDQConvert {
 			outputHeaders.add("MethodGuid"); // uuid for the Method
 			outputHeaders.add("AuthoritiesDefaults");   // Specification authorities and default values Framework property	
 			outputHeaders.add("Description"); // Human readable summary of structured concepts in the test --> rdfs:comment on DataQualityNeed
-			// TODO: Unused, remove
-			outputHeaders.add("Criterion Label"); // Human readable summary of structured concepts in the test 
+			// outputHeaders.add("Criterion Label"); // Human readable summary of structured concepts in the test  Unused 
 			outputHeaders.add("Type");  // Output Type  Framework Class: Validation/Amendment/Measure/Issue  -->rdf:type
 			outputHeaders.add("Resource Type");   // Resource Type Single- or Multi- Record  Framework concept bdqffdq;hasResourcetype
 			outputHeaders.add("Dimension");	 //DQ Dimension  Framework concept  --> bdqffdq:hasDataQualityDimension
@@ -330,6 +329,9 @@ public class BDQConvert {
 			outputHeaders.add("IssueLabels");  // Labels present on the github issue. --> unused
 			outputHeaders.add("UseCases"); // UseCases the test is included in 
 			outputHeaders.add("ArgumentGuids"); // List of guids for arguments parsed from authoritiesDefaults	
+			outputHeaders.add("status"); // to allow generation of rows for a term-version document, set to recommended.
+			outputHeaders.add("flags"); // 	currently unused
+			outputHeaders.add("organized_in");  // For index creation
 
 			// Headers as they appear as keys in the key/value markdown table in the issues
 			ArrayList<String> headers = new ArrayList<String>();
@@ -658,7 +660,7 @@ public class BDQConvert {
 							outputLine.put("Description", outputDes);
 							outputLine.put("ExpectedResponse", specificationDescription );
 							outputLine.put("AuthoritiesDefaults", sourceAuthority);
-							outputLine.put("Criterion Label", criterionLabel);
+							// outputLine.put("Criterion Label", criterionLabel);
 							if (frameworkClass.toUpperCase().equals("VALIDATION") || frameworkClass.toUpperCase().equals("ISSUE")) { 
 								String criterion = termActions.substring(termActions.indexOf("_")+1);
 								logger.debug(criterion);
@@ -749,6 +751,9 @@ public class BDQConvert {
 								}
 								outputLine.put("ArgumentGuids", argumentGuids.toString());
 							}
+							outputLine.put("status", "recommended");
+							outputLine.put("flags", "");
+							outputLine.put("organized_in", outputLine.get("Type"));
 							
 							Iterator<String> iok = outputHeaders.iterator();
 							while (iok.hasNext()) {
@@ -777,6 +782,7 @@ public class BDQConvert {
 									String forValidation = measureLine.get("Label");
 									String origPrefLabel = measureLine.get("prefLabel");
 									measureLine.replace("Type", "Measure");
+									measureLine.replace("organized_in", "Measure");
 									measureLine.replace("Resource Type","MultiRecord");
 									// String now = new SimpleDateFormat("yyyy-MM-dd").format(Calendar.getInstance().getTime());
 									// measureLine.replace("DateLastUpdated",now);
