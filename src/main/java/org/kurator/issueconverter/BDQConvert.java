@@ -73,7 +73,7 @@ import org.json.JSONObject;
  */
 public class BDQConvert {
 
-	private static String version = "0.0.1-SNAPSHOT";
+	private static String version = "1.0.0";
 
 	private static String commandLine = "java -jar issueconverter-"+version+"-jar-with-dependencies.jar";
 

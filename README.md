@@ -21,17 +21,17 @@ If more than one json file, combine, e.g (using the jq command line JSON process
 
 Then convert to csv with issueconverter jar (produces a converted csv file in output.csv)
 
-usage: java -jar issueconverter-1.0.0-SNAPSHOT-jar-with-dependencies.jar
+usage: java -jar issueconverter-1.0.0-jar-with-dependencies.jar
  -f <arg>   JSON file to convert
 
-    java -jar issueconverter-1.0.0-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json 
+    java -jar issueconverter-1.0.0-jar-with-dependencies.jar -f issuelist.json 
 
 The resulting output.csv (produced from issuelist.json) is the file which is checked in to tdwg/bdq as https://github.com/tdwg/bdq/blob/master/tg2/core/TG2_tests.csv
 
 Java class anotations are shown on the console as issueconverter is running, if desired, you can capture these
 java annotations for each test to a file:
 
-    java -jar issueconverter-1.0.0-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json  > annotations.java
+    java -jar issueconverter-1.0.0-jar-with-dependencies.jar -f issuelist.json  > annotations.java
 
 The resulting output.csv should be in suitable form for input into kurator-ffdq utility test-util.sh to generate RDF, for example: 
 
@@ -50,7 +50,7 @@ the test-util.sh utility in kurator-ffdq):
     wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100"  -O issuelist1.json
     wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100&page=2" -O issuelist2.json
     jq -s 'flatten | group_by(.id) | map(reduce .[] as $x ({}; . * $x))' issuelist1.json issuelist2.json > issuelist.json
-    java -jar ./target/issueconverter-1.0.0-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json -u ../bdq/tg2/core/usecase_test_list.csv -l ../bdq/tg2/core/test_label_mappings.csv -g ../bdq/tg2/core/TG2_tests_additional_guids.csv -a TG2_tests_argument_guids.csv
+    java -jar ./target/issueconverter-1.0.0-jar-with-dependencies.jar -f issuelist.json -u ../bdq/tg2/core/usecase_test_list.csv -l ../bdq/tg2/core/test_label_mappings.csv -g ../bdq/tg2/core/TG2_tests_additional_guids.csv -a TG2_tests_argument_guids.csv
     cd ~/git
     git clone git@github.com:tdwg/bdq.git
     cp bdq_issue_to_csv/output.csv bdq/tg2/core/TG2_tests.csv
@@ -67,7 +67,7 @@ And for supplementary tests:
 
     cd ../bdq_issue_to_csv
     wget "https://api.github.com/repos/tdwg/bdq/issues?labels=Supplementary&per_page=100&state=all" -O supplementalissuelist.json
-    java -jar target/issueconverter-1.0.0-SNAPSHOT-jar-with-dependencies.jar -f supplementalissuelist.json
+    java -jar target/issueconverter-1.0.0-jar-with-dependencies.jar -f supplementalissuelist.json
     cp ./output.csv ../bdq/tg2/supplementary/TG2_supplementary_tests.csv
     cd ../kurator-ffdq
     grep -v "AllDarwin" ../bdq/tg2/supplementary/TG2_supplementary_tests.csv  > data/TG2_supplementary_tests.csv
