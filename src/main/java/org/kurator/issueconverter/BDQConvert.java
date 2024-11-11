@@ -413,7 +413,8 @@ public class BDQConvert {
 					JSONObject element = jsonArray.getJSONObject(x);
 					String body = (String) element.get("body");	        	
 					Integer number = (Integer) element.get("number");
-					String historyNoteUrl = element.getString("url");
+					//String historyNoteUrl = element.getString("url");  // url in json is api.github.com
+					String historyNoteUrl = element.getString("html_url");  // html_url in json is link to html page for issue
 					String state = (String) element.get("state");
 					String updated_at = (String) element.get("updated_at");
 					if (updated_at.length()>10) { 
