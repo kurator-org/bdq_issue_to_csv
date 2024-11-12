@@ -2,6 +2,9 @@
 
 This is a small, special purpose, Java utility for for converting the issue metadata and markdown table in the tdwd/bdq TG2 issues (https://github.com/tdwg/bdq/labels/TG2) into csv for eaiser human consumption.  Issue metadata and the key/value pairs in the markdown table in the body of each issue are placed in columns in an output.csv file in a form suitable for conversion to fittness for use framework rdf and annotated stub java methods by the test-util.sh utility in kurator-ffdq.
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14057551.svg)](https://doi.org/10.5281/zenodo.14057551)
+
+
 ## Building ##
 
 Build with
