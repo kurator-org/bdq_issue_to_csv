@@ -2,6 +2,8 @@
 
 This is a small, special purpose, Java utility for for converting the issue metadata and markdown table in the tdwd/bdq TG2 issues (https://github.com/tdwg/bdq/labels/TG2) into csv for eaiser human consumption.  Issue metadata and the key/value pairs in the markdown table in the body of each issue are placed in columns in an output.csv file in a form suitable for conversion to fittness for use framework rdf and annotated stub java methods by the test-util.sh utility in kurator-ffdq.
 
+**Note: As of 2025-04-01 The TDWG BDQ Core CORE tests are now maintained from a CSV file in the tdwg/bdq repository.  Supplementary tests are still defined by markdwn tables in github issues and use this code**
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14057551.svg)](https://doi.org/10.5281/zenodo.14057551)
 
 
@@ -13,10 +15,14 @@ Build with
 
 ## Use ##
 
-Obtain issues (with label=CORE https://github.com/tdwg/bdq/issues?q=is%3Aissue+label%3ACORE on web UI) as json from github API:
+Obtain issues tagged as supplementary as json from github API:
 
-    wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100"  -O issuelist1.json
-    wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100&page=2" -O issuelist2.json
+    wget "https://api.github.com/repos/tdwg/bdq/issues?labels=Supplementary&per_page=100&state=all" -O supplementalissuelist.json
+
+Prior to 2025-04-01 (with label=CORE https://github.com/tdwg/bdq/issues?q=is%3Aissue+label%3ACORE on web UI) as json from github API:
+
+    #wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100"  -O issuelist1.json
+    #wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100&page=2" -O issuelist2.json
 
 If more than one json file, combine, e.g (using the jq command line JSON processor). 
 
@@ -27,9 +33,11 @@ Then convert to csv with issueconverter jar (produces a converted csv file in ou
 usage: java -jar issueconverter-1.0.1-SNAPSHOT-jar-with-dependencies.jar
  -f <arg>   JSON file to convert
 
-    java -jar issueconverter-1.0.1-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json 
+    java -jar issueconverter-1.0.1-SNAPSHOT-jar-with-dependencies.jar -f supplementalissuelist.json 
 
-The resulting output.csv (produced from issuelist.json) is the file which is checked in to tdwg/bdq as https://github.com/tdwg/bdq/blob/master/tg2/core/TG2_tests.csv
+The output.csv (produced from issuelist.json) is the file which is checked in to tdwg/bdq as https://github.com/tdwg/bdq/blob/master/tg2/supplementary/TG2_supplementary_tests.csv.
+
+The output.csv (produced from issuelist.json from the CORE tests) was the file which is checked in to tdwg/bdq as https://github.com/tdwg/bdq/blob/master/tg2/core/TG2_tests.csv, which is now the master source for the tests and should not be overwritten by this utility.
 
 Java class anotations are shown on the console as issueconverter is running, if desired, you can capture these
 java annotations for each test to a file:
@@ -44,20 +52,20 @@ The resulting output.csv should be in suitable form for input into kurator-ffdq 
 
 or, in more detail, using the csv copy of the tests in tdwg/bdq to generate the RDF/XML copy of the tests in tdwg/bdq (note, 
 other than the test GUIDs, the uuid values in the generated RDF are not stable and will be replaced with each run of 
-the test-util.sh utility in kurator-ffdq):
+the test-util.sh utility in kurator-ffdq).  Lines no longer in use are commented out with #:  
 
     cd ~/git
     git clone git@github.com:kurator-org/bdq_issue_to_csv.git
     cd bdq_issue_to_csv
     mvn package
-    wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100"  -O issuelist1.json
-    wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100&page=2" -O issuelist2.json
-    jq -s 'flatten | group_by(.id) | map(reduce .[] as $x ({}; . * $x))' issuelist1.json issuelist2.json > issuelist.json
-    java -jar ./target/issueconverter-1.0.1-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json -u ../bdq/tg2/core/usecase_test_list.csv -l ../bdq/tg2/core/test_label_mappings.csv -g ../bdq/tg2/core/TG2_tests_additional_guids.csv -a TG2_tests_argument_guids.csv
+    # wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100"  -O issuelist1.json
+    # wget "https://api.github.com/repos/tdwg/bdq/issues?labels=CORE&per_page=100&page=2" -O issuelist2.json
+    # jq -s 'flatten | group_by(.id) | map(reduce .[] as $x ({}; . * $x))' issuelist1.json issuelist2.json > issuelist.json
+    # java -jar ./target/issueconverter-1.0.1-SNAPSHOT-jar-with-dependencies.jar -f issuelist.json -u ../bdq/tg2/core/usecase_test_list.csv -l ../bdq/tg2/core/test_label_mappings.csv -g ../bdq/tg2/core/TG2_tests_additional_guids.csv -a TG2_tests_argument_guids.csv
     cd ~/git
     git clone git@github.com:tdwg/bdq.git
-    cp bdq_issue_to_csv/output.csv bdq/tg2/core/TG2_tests.csv
-    cp bdq_issue_to_csv/multirecord_measures.csv bdq/tg2/core/TG2_multirecord_measure_tests.csv
+    # cp bdq_issue_to_csv/output.csv bdq/tg2/core/TG2_tests.csv
+    # cp bdq_issue_to_csv/multirecord_measures.csv bdq/tg2/core/TG2_multirecord_measure_tests.csv
     git clone git@github.com:kurator-org/kurator-ffdq
     cd kurator-ffdq
     mvn package
