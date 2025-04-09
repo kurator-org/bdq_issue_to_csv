@@ -123,7 +123,7 @@ public class BDQConvert {
 		enhancementMap.put("ASSUMEDDEFAULT", "AssumedDefault");
 		enhancementMap.put("CONVERTED", "Converted");
 		enhancementMap.put("STANDARDIZED", "Standardized");
-		enhancementMap.put("FROM", "FillInFrom");
+		enhancementMap.put("FROM", "FilledInFrom");
 		enhancementMap.put("TRANSPOSED", "Transposed");
 		
 
