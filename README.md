@@ -2,7 +2,9 @@
 
 This is a small, special purpose, Java utility for for converting the issue metadata and markdown table in the tdwd/bdq TG2 issues (https://github.com/tdwg/bdq/labels/TG2) into csv for eaiser human consumption.  Issue metadata and the key/value pairs in the markdown table in the body of each issue are placed in columns in an output.csv file in a form suitable for conversion to fittness for use framework rdf and annotated stub java methods by the test-util.sh utility in kurator-ffdq.
 
-**Note: As of 2025-04-01 The TDWG BDQ Core CORE tests are now maintained from a CSV file in the tdwg/bdq repository.  Supplementary tests are still defined by markdwn tables in github issues and use this code**
+**Note: As of 2025-04-01 The TDWG BDQ CORE tests are now maintained from a CSV file in the tdwg/bdq repository.  Supplementary tests are still defined by markdwn tables in github issues and use this code**
+
+**Note: As of 2025-04-29, BDQ references the BDQ (draft) Standard, CORE references the tag for tests included in the initial draft standard, and bdqtest: (not bdqcore:) is the namespace abbreviation for the vocabulary containing the test definitions.
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14057551.svg)](https://doi.org/10.5281/zenodo.14057551)
 

@@ -525,8 +525,8 @@ public class BDQConvert {
 
 								if (key.equals("GUID")) { 
 									outputLine.put("term_localName", value); 
-									outputLine.put("term_iri","https://rs.tdwg.org/bdqcore/terms/" + value);
-									outputLine.put("iri","https://rs.tdwg.org/bdqcore/terms/version/" + value + "-" + updated_at);
+									outputLine.put("term_iri","https://rs.tdwg.org/bdqtest/terms/" + value);
+									outputLine.put("iri","https://rs.tdwg.org/bdqtest/terms/version/" + value + "-" + updated_at);
 									String prefLabel = "Missing prefLabel";
 									if (prefLabelMap.containsKey(value)) { 
 										prefLabel = prefLabelMap.get(value);
@@ -811,14 +811,14 @@ public class BDQConvert {
 									measureLine.replace("Parameters", "");
 									if (measureGuids.containsKey(label)) {
 										measureLine.replace("term_localName", measureGuids.get(label));
-										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqcore/terms/" + measureGuids.get(label));
-										measureLine.replace("iri", "https://rs.tdwg.org/bdqcore/terms/version/" + measureGuids.get(label) + "-" + updated_at);
+										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqtest/terms/" + measureGuids.get(label));
+										measureLine.replace("iri", "https://rs.tdwg.org/bdqtest/terms/version/" + measureGuids.get(label) + "-" + updated_at);
 									} else { 
 										logger.debug(label + " Not Found");
 										String mintedGuid =  UUID.randomUUID().toString();
 										measureLine.replace("term_localName", mintedGuid);
-										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqcore/terms/" + mintedGuid);
-										measureLine.replace("iri", "https://rs.tdwg.org/bdqcore/terms/version/" + mintedGuid + "-" + updated_at);
+										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqtest/terms/" + mintedGuid);
+										measureLine.replace("iri", "https://rs.tdwg.org/bdqtest/terms/version/" + mintedGuid + "-" + updated_at);
 									}
 									measureLine.replace("Examples", "");
 									measureLine.replace("References", "Veiga AK, Saraiva AM, Chapman AD, Morris PJ, Gendreau C, Schigel D, Robertson TJ (2017). A conceptual framework for quality assessment and management of biodiversity data. PLOS ONE 12(6): e0178731. https://doi.org/10.1371/journal.pone.0178731");;
@@ -838,14 +838,14 @@ public class BDQConvert {
 									label = measureLine.get("Label");
 									if (measureGuids.containsKey(label)) {
 										measureLine.replace("term_localName", measureGuids.get(label));
-										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqcore/terms/" + measureGuids.get(label));
-										measureLine.replace("iri", "https://rs.tdwg.org/bdqcore/terms/version/" + measureGuids.get(label) + "-" + updated_at);
+										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqtest/terms/" + measureGuids.get(label));
+										measureLine.replace("iri", "https://rs.tdwg.org/bdqtest/terms/version/" + measureGuids.get(label) + "-" + updated_at);
 									} else { 
 										logger.debug(label + " Not Found");
 										String mintedGuid =  UUID.randomUUID().toString();
 										measureLine.replace("term_localName", mintedGuid);
-										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqcore/terms/" + mintedGuid);
-										measureLine.replace("iri", "https://rs.tdwg.org/bdqcore/terms/version/" + mintedGuid + "-" + updated_at);
+										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqtest/terms/" + mintedGuid);
+										measureLine.replace("iri", "https://rs.tdwg.org/bdqtest/terms/version/" + mintedGuid + "-" + updated_at);
 									}
 									measureLine.replace("Specification", "Count the number of " + forValidation + " in the MultiRecord that have Response.result=COMPLIANT." );
 									measureLine.replace("Description", "Count the number of " + forValidation + " in a record set that are COMPLIANT" );
