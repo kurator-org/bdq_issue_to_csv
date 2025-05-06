@@ -25,7 +25,7 @@ if [ $ok = "true" ]; then
     # Supplementary Tests
     cd ../bdq_issue_to_csv
     wget "https://api.github.com/repos/tdwg/bdq/issues?labels=Supplementary&per_page=100&state=all" -O supplementalissuelist.json
-    java -jar target/issueconverter-1.0.1-SNAPSHOT-jar-with-dependencies.jar -f supplementalissuelist.json
+    java -jar target/issueconverter-1.2.0-SNAPSHOT-jar-with-dependencies.jar -f supplementalissuelist.json
     cp ./output.csv ../bdq/tg2/supplementary/TG2_supplementary_tests.csv
     cd ../kurator-ffdq
     grep -v "AllDarwin" ../bdq/tg2/supplementary/TG2_supplementary_tests.csv  > data/TG2_supplementary_tests.csv
