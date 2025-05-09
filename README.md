@@ -2,9 +2,9 @@
 
 This is a small, special purpose, Java utility for for converting the issue metadata and markdown table in the tdwd/bdq TG2 issues (https://github.com/tdwg/bdq/labels/TG2) into csv for eaiser human consumption.  Issue metadata and the key/value pairs in the markdown table in the body of each issue are placed in columns in an output.csv file in a form suitable for conversion to fittness for use framework rdf and annotated stub java methods by the test-util.sh utility in kurator-ffdq.
 
-**Note: As of 2025-04-01 The TDWG BDQ CORE tests are now maintained from a CSV file in the tdwg/bdq repository.  Supplementary tests are still defined by markdwn tables in github issues and use this code**
+**Note: As of 2025-04-01 The TDWG BDQ Standard CORE tests are now maintained from a CSV file in the tdwg/bdq repository, this code documents how a csv representation of those tests was produced from markdown tables in github issues.  Supplementary tests are still defined by markdown tables in github issues and use this code**
 
-**Note: As of 2025-04-29, BDQ references the BDQ (draft) Standard, CORE references the tag for tests included in the initial draft standard, and bdqtest: (not bdqcore:) is the namespace abbreviation for the vocabulary containing the test definitions.
+**Note: As of 2025-04-29, "BDQ" references the BDQ (draft) Standard, "CORE" references the tag for tests included in the initial draft standard, and "bdqtest:" (not bdqcore:) is the namespace abbreviation for the vocabulary containing the test definitions.
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14057551.svg)](https://doi.org/10.5281/zenodo.14057551)
 
@@ -54,7 +54,7 @@ The resulting output.csv should be in suitable form for input into kurator-ffdq 
 
 or, in more detail, using the csv copy of the tests in tdwg/bdq to generate the RDF/XML copy of the tests in tdwg/bdq (note, 
 other than the test GUIDs, the uuid values in the generated RDF are not stable and will be replaced with each run of 
-the test-util.sh utility in kurator-ffdq).  Lines no longer in use are commented out with #:  
+the test-util.sh utility in kurator-ffdq).  **Lines no longer in use are commented out with #**:  
 
     cd ~/git
     git clone git@github.com:kurator-org/bdq_issue_to_csv.git
