@@ -801,10 +801,10 @@ public class BDQConvert {
 									}
 									measureLine.replace("InformationElement:ActedUpon", "bdq:"+ forValidation + ".Response");
 									if (measureGuids.containsKey(label) && measuresAllowingIPNM.contains(label))  {
-										measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT or Response.status=INTERNAL_PREREQUISITES_NOT_MET, otherwise NOT_COMPLETE." );
+										measureLine.replace("ExpectedResponse", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT or Response.status=INTERNAL_PREREQUISITES_NOT_MET, otherwise NOT_COMPLETE." );
 										measureLine.replace("Description", "Measure if all " + forValidation + " in a record set are COMPLIANT or INTERNAL_PREREQUISITES_NOT_MET (indicating some empty value)" );
 									} else { 
-										measureLine.replace("Specification", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT; otherwise NOT_COMPLETE." );
+										measureLine.replace("ExpectedResponse", "COMPLETE if every " + forValidation + " in the MultiRecord has Response.result=COMPLIANT; otherwise NOT_COMPLETE." );
 										measureLine.replace("Description", "Measure if all " + forValidation + " in a record set are COMPLIANT" );
 									}
 									measureLine.replace("Notes", "For Quality Assurance, filter record set until this measure is COMPLETE.");
@@ -847,7 +847,7 @@ public class BDQConvert {
 										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqtest/terms/" + mintedGuid);
 										measureLine.replace("iri", "https://rs.tdwg.org/bdqtest/terms/version/" + mintedGuid + "-" + updated_at);
 									}
-									measureLine.replace("Specification", "Count the number of " + forValidation + " in the MultiRecord that have Response.result=COMPLIANT." );
+									measureLine.replace("ExpectedResponse", "Count the number of " + forValidation + " in the MultiRecord that have Response.result=COMPLIANT." );
 									measureLine.replace("Description", "Count the number of " + forValidation + " in a record set that are COMPLIANT" );
 									measureLine.replace("Notes", "For Quality Control, compare the Response.result of this measure with the total number of records to assess work needed on the record set.");
 									imk = outputHeaders.iterator();
