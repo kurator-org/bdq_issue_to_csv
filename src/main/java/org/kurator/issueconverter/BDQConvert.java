@@ -790,14 +790,19 @@ public class BDQConvert {
 									measureLine.replace("Source", "TG2");
 									measureLine.replace("Criterion", ""); // not applicable to measures
 									measureLine.replace("Enhancement", ""); // not applicable to measures
+									measureLine.replace("argumentGuids", ""); // not applicable to measures
+									measureLine.replace("AuthoritiesDefaults", ""); // not applicable to measures
+									measureLine.replace("Parameters", ""); // not applicable to measures
 									String labelStart = "MULTIRECORD_MEASURE_QA";
 									measureLine.replace("Label",measureLine.get("Label").toString().replace("VALIDATION", labelStart));
 									measureLine.replace("prefLabel", "Measurement over MultiRecord for QualityAssurance of " + origPrefLabel);
 									String label = measureLine.get("Label");
 									if (measureGuids.containsKey(label) && measuresAllowingIPNM.contains(label))  {
-										measureLine.replace("#", "297");  // point to single issue for measuring multirecords for compliance
+										measureLine.replace("issueNumber", "297");  // point to single issue for measuring multirecords for compliance
+										measureLine.replace("historyNoteUrl","https://github.com/tdwg/bdq/issues/297");
 									} else {  
-									 	measureLine.replace("#", "295");  // point to single issue for measuring multirecords for compliance
+									 	measureLine.replace("issueNumber", "295");  // point to single issue for measuring multirecords for compliance
+										measureLine.replace("historyNoteUrl","https://github.com/tdwg/bdq/issues/295");
 									}
 									measureLine.replace("InformationElement:ActedUpon", "bdq:"+ forValidation + ".Response");
 									if (measureGuids.containsKey(label) && measuresAllowingIPNM.contains(label))  {
@@ -832,7 +837,8 @@ public class BDQConvert {
 									}
 									// QC measures with counts
 									outputPrinterMeasures.println();
-									measureLine.replace("#", "296");  // point to single issue for multirecord measures with counts
+									measureLine.replace("issueNumber", "296");  // point to single issue for multirecord measures with counts
+									measureLine.replace("historyNoteUrl","https://github.com/tdwg/bdq/issues/296");
 									measureLine.replace("Label",measureLine.get("Label").toString().replace(labelStart, "MULTIRECORD_MEASURE_COUNT_COMPLIANT"));
 									measureLine.replace("prefLabel", "Measurement over MultiRecord Counting Compliance of " + origPrefLabel);
 									label = measureLine.get("Label");
