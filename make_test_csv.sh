@@ -30,7 +30,7 @@ if [ $ok = "true" ]; then
 	# with files for the same to support stable guids on each build
     cp ./output.csv ../bdq/tg2/supplementary/TG2_supplementary_tests.csv
     cd ../kurator-ffdq
-    grep -v "AllDarwin" ../bdq/tg2/supplementary/TG2_supplementary_tests.csv  > data/TG2_supplementary_tests.csv
+    grep -v "AllDarwin" ../bdq/tg2/supplementary/TG2_supplementary_tests.csv  | grep -v "AllAmendmentTestsRunOnSingleRecord" > data/TG2_supplementary_tests.csv
     ./test-util.sh -config data/tg2_tests.properties -format RDFXML -out ../bdq/tg2/supplementary/TG2_supplementary_tests.xml -in data/TG2_supplementary_tests.csv -ieGuidFile ../bdq/tg2/core/information_element_guids.csv -guidFile ../bdq/tg2/supplementary/TG2_supplementary_additional_guids.csv
 
 fi
