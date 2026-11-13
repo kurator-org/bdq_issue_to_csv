@@ -764,7 +764,18 @@ public class BDQConvert {
 							outputPrinter.println();
 							
 							System.out.println("@Provides(value=\"urn:uuid:" + outputLine.get("term_localName")+ "\")");
-							System.out.println("@ProvidesVersion(value=\"https://rs.tdwg.org/bdq/terms/" + outputLine.get("term_localName")+ "/" +  outputLine.get("DateLastUpdated") + "\")");
+							// The version implementations cite. For a test in the BDQ standard (issue labeled CORE): its
+							// version on its DateLastUpdated, in rs.tdwg.org's canonical version IRI form. For other tests
+							// (e.g. Supplementary), which have no rs.tdwg.org IRI: urn:uuid:<uuid>, with the version date
+							// in the javadoc (see tdwg/bdq#340).
+							String issueLabelList = outputLine.get("IssueLabels") == null ? "" : outputLine.get("IssueLabels");
+							// labels are joined with single spaces (some labels contain spaces themselves)
+							if ((" " + issueLabelList + " ").contains(" CORE ")) {
+								System.out.println("@ProvidesVersion(value=\"https://rs.tdwg.org/bdqtest/terms/version/" + outputLine.get("term_localName")+ "-" +  outputLine.get("DateLastUpdated") + "\")");
+							} else {
+								System.out.println("@ProvidesVersion(value=\"urn:uuid:" + outputLine.get("term_localName") + "\")");
+								System.out.println("// Version: " + outputLine.get("DateLastUpdated"));
+							}
 							System.out.println("@"+frameworkClass+"( label = \"" + outputLine.get("Label") + "\", description=\"" + outputDes + "\")");
 							System.out.println("@Specification(value=\"" + specificationDescription +"\")");
 							System.out.println("");
