@@ -202,7 +202,6 @@ public class BDQConvert {
 		
 		Map<String,String> specificationMap = new HashMap<String,String>();
 		Map<String,String> methodMap = new HashMap<String,String>();
-		Map<String,String> policyMap = new HashMap<String,String>();
 		if (guidMappingFilename != null && guidMappingFilename.length()>0) {
 			File guidMappingFile = new File(guidMappingFilename);
 			logger.debug(guidMappingFilename);
@@ -218,10 +217,8 @@ public class BDQConvert {
 						String guid = argumentRecord.get("GUID").trim();
 						String method = argumentRecord.get("Method");
 						String spec = argumentRecord.get("Specification");
-						String policy = argumentRecord.get("Policy");
 						specificationMap.put(guid, spec);
 						methodMap.put(guid, method);
-						policyMap.put(guid, policy);
 					}
 					includeAdditionalGuids = true;
 				} catch (IOException e) { 
@@ -836,6 +833,7 @@ public class BDQConvert {
 										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqtest/terms/" + mintedGuid);
 										measureLine.replace("iri", "https://rs.tdwg.org/bdqtest/terms/version/" + mintedGuid + "-" + updated_at);
 									}
+									setMeasureElementGuids(measureLine, includeAdditionalGuids, specificationMap, methodMap);
 									measureLine.replace("Examples", "");
 									measureLine.replace("References", "Veiga AK, Saraiva AM, Chapman AD, Morris PJ, Gendreau C, Schigel D, Robertson TJ (2017). A conceptual framework for quality assessment and management of biodiversity data. PLOS ONE 12(6): e0178731. https://doi.org/10.1371/journal.pone.0178731");;
 									measureLine.replace("InformationElement:Consulted","");
@@ -864,6 +862,7 @@ public class BDQConvert {
 										measureLine.replace("term_iri", "https://rs.tdwg.org/bdqtest/terms/" + mintedGuid);
 										measureLine.replace("iri", "https://rs.tdwg.org/bdqtest/terms/version/" + mintedGuid + "-" + updated_at);
 									}
+									setMeasureElementGuids(measureLine, includeAdditionalGuids, specificationMap, methodMap);
 									measureLine.replace("ExpectedResponse", "Count the number of " + forValidation + " in the MultiRecord that have Response.result=COMPLIANT." );
 									measureLine.replace("Description", "Count the number of " + forValidation + " in a record set that are COMPLIANT" );
 									measureLine.replace("Notes", "For Quality Control, compare the Response.result of this measure with the total number of records to assess work needed on the record set.");
@@ -910,4 +909,23 @@ public class BDQConvert {
 		}
 	}
 
+	/**
+	 * A MultiRecord Measure is built from a copy of the row of the Validation it aggregates, so its
+	 * SpecificationGuid and MethodGuid would be those of the Validation.  Replace them with the Measure's
+	 * own Specification and Method from the GUID mapping file (keyed by the Measure's GUID, in
+	 * term_localName), or leave them empty if the Measure is not in that file.
+	 *
+	 * @param measureLine the output row of the Measure, with its term_localName already set
+	 * @param includeAdditionalGuids whether a GUID mapping file was loaded
+	 * @param specificationMap Test GUID to Specification GUID
+	 * @param methodMap Test GUID to Method GUID
+	 */
+	private static void setMeasureElementGuids(Map<String,String> measureLine, boolean includeAdditionalGuids,
+			Map<String,String> specificationMap, Map<String,String> methodMap) {
+		if (includeAdditionalGuids) {
+			String measureGuid = measureLine.get("term_localName");
+			measureLine.put("SpecificationGuid", specificationMap.getOrDefault(measureGuid, ""));
+			measureLine.put("MethodGuid", methodMap.getOrDefault(measureGuid, ""));
+		}
+	}
 }
